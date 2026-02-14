@@ -1,0 +1,2395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>SnapDrop — Canadian Marketplace</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+
+  :root {
+    --bg: #f5f0e8;
+    --surface: #faf7f2;
+    --card-bg: #ffffff;
+    --ink: #1a1410;
+    --ink-soft: #6b5f52;
+    --accent: #e8440a;
+    --accent-soft: #fff0eb;
+    --felt: #2d4a3e;
+    --felt-light: #3a6052;
+    --tag-bg: #f0ebe0;
+    --border: #e0d8cc;
+    --shadow: rgba(0,0,0,0.12);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* ── VIEWS ── */
+  .view { position: absolute; inset: 0; transition: transform 0.45s cubic-bezier(0.4,0,0.2,1), opacity 0.45s ease; }
+  .view.hidden-left  { transform: translateX(-100%); opacity: 0; pointer-events: none; }
+  .view.hidden-right { transform: translateX(100%);  opacity: 0; pointer-events: none; }
+  .view.visible      { transform: translateX(0);     opacity: 1; }
+
+  /* ── HOME VIEW ── */
+  #homeView {
+    display: flex;
+    flex-direction: column;
+    background: var(--bg);
+  }
+
+  .home-header {
+    padding: 56px 24px 20px;
+    background: var(--surface);
+    border-bottom: 1.5px solid var(--border);
+  }
+
+  .wordmark {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 28px;
+    color: var(--ink);
+    letter-spacing: -1px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .wordmark span {
+    color: var(--accent);
+  }
+
+  .tagline {
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin-top: 4px;
+    font-weight: 300;
+  }
+
+  /* mood search */
+  .mood-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 16px;
+    background: var(--card-bg);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    padding: 12px 16px;
+    cursor: text;
+    position: relative;
+  }
+
+  .mood-bar .mic-icon {
+    font-size: 18px;
+    cursor: pointer;
+    transition: transform 0.2s;
+    flex-shrink: 0;
+  }
+
+  .mood-bar .mic-icon:active { transform: scale(0.9); }
+
+  .mood-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: var(--ink);
+    background: transparent;
+    caret-color: var(--accent);
+  }
+
+  .mood-input::placeholder { color: #b0a898; }
+
+  .mood-btn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 7px 14px;
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    flex-shrink: 0;
+  }
+
+  .mood-btn:active { transform: scale(0.95); background: #c73800; }
+
+  /* category pills */
+  .cat-scroll {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 16px 24px 4px;
+    scrollbar-width: none;
+    flex-shrink: 0;
+  }
+  .cat-scroll::-webkit-scrollbar { display: none; }
+
+  .cat-pill {
+    flex-shrink: 0;
+    padding: 8px 16px;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1.5px solid var(--border);
+    background: var(--card-bg);
+    color: var(--ink-soft);
+    transition: all 0.2s;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .cat-pill.active {
+    background: var(--ink);
+    color: white;
+    border-color: var(--ink);
+  }
+
+  .cat-pill:active { transform: scale(0.96); }
+
+  /* home actions */
+  .home-actions {
+    display: flex;
+    gap: 12px;
+    padding: 12px 24px;
+    flex-shrink: 0;
+  }
+
+  .action-card {
+    flex: 1;
+    border-radius: 18px;
+    padding: 18px 16px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    border: 1.5px solid transparent;
+  }
+
+  .action-card:active { transform: scale(0.97); }
+
+  .action-card.snap-card {
+    background: var(--accent);
+    color: white;
+  }
+
+  .action-card.browse-card {
+    background: var(--felt);
+    color: white;
+  }
+
+  .action-card .action-emoji { font-size: 28px; }
+
+  .action-card .action-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+  }
+
+  .action-card .action-sub {
+    font-size: 12px;
+    opacity: 0.8;
+    font-weight: 300;
+  }
+
+  /* recent items grid */
+  .section-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    padding: 0 24px 10px;
+    flex-shrink: 0;
+  }
+
+  .items-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 3px;
+    padding: 0 24px;
+    overflow-y: auto;
+    flex: 1;
+    padding-bottom: 100px;
+  }
+
+  .grid-item {
+    aspect-ratio: 1;
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+    background: var(--tag-bg);
+    transition: transform 0.15s;
+  }
+
+  .grid-item:active { transform: scale(0.97); }
+
+  .grid-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .grid-item .item-cat-tag {
+    position: absolute;
+    bottom: 6px;
+    left: 6px;
+    background: rgba(0,0,0,0.65);
+    color: white;
+    font-size: 9px;
+    font-weight: 600;
+    padding: 3px 7px;
+    border-radius: 100px;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    backdrop-filter: blur(4px);
+  }
+
+  .grid-item .interest-dot {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ff3b30;
+    border: 1.5px solid white;
+  }
+
+  /* ── TABLE VIEW ── */
+  #tableView {
+    background: var(--felt);
+    overflow: hidden;
+  }
+
+  .table-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    padding: 52px 20px 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: linear-gradient(to bottom, rgba(45,74,62,1) 60%, transparent);
+  }
+
+  .back-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    border: none;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+    flex-shrink: 0;
+  }
+
+  .back-btn:active { background: rgba(255,255,255,0.3); }
+
+  .table-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    color: white;
+    flex: 1;
+  }
+
+  .table-subtitle {
+    font-size: 11px;
+    color: rgba(255,255,255,0.6);
+    margin-top: 1px;
+  }
+
+  /* felt texture */
+  .felt-surface {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 20% 50%, rgba(58,96,82,0.4) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 20%, rgba(35,60,50,0.3) 0%, transparent 50%),
+      var(--felt);
+  }
+
+  .felt-dots {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  /* cards on table */
+  .table-surface {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+
+  .table-card {
+    position: absolute;
+    width: 140px;
+    border-radius: 14px;
+    background: var(--card-bg);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3), 0 1px 4px rgba(0,0,0,0.2);
+    cursor: grab;
+    transition: box-shadow 0.25s, transform 0.25s, left 0.0s, top 0.0s;
+    user-select: none;
+    touch-action: none;
+    overflow: hidden;
+  }
+
+  .table-card.dropping {
+    transition: box-shadow 0.3s, transform 0.35s cubic-bezier(0.34,1.4,0.64,1), left 0s, top 0s;
+  }
+
+  .table-card.dragging {
+    cursor: grabbing;
+    box-shadow: 0 20px 56px rgba(0,0,0,0.55), 0 4px 12px rgba(0,0,0,0.3);
+    z-index: 9999 !important;
+    transform: scale(1.07) rotate(3deg) !important;
+    transition: box-shadow 0.15s, transform 0.15s;
+  }
+
+  /* ── PILE FOCUS MODE — no zoom, cards physically pushed off screen ── */
+
+  /* arranging handles left/top/transform/opacity in one transition */
+  .table-card.arranging {
+    transition: left 0.52s cubic-bezier(0.4,0,0.2,1),
+                top  0.52s cubic-bezier(0.4,0,0.2,1),
+                transform 0.52s cubic-bezier(0.4,0,0.2,1),
+                opacity 0.38s ease,
+                box-shadow 0.2s !important;
+  }
+
+  /* cards in the focused pile — full interactivity */
+  .table-card.pile-in { cursor: grab; }
+  .table-card.pile-in.dragging {
+    cursor: grabbing;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.65) !important;
+    z-index: 9999 !important;
+  }
+
+  /* cards pushed off screen — invisible, no pointer events */
+  .table-card.pile-out {
+    pointer-events: none !important;
+  }
+
+  /* top bar shown during pile focus */
+  .pile-focus-bar {
+    position: absolute; top: 0; left: 0; right: 0; z-index: 200;
+    padding: 52px 20px 14px;
+    display: none; align-items: center; gap: 12px;
+    background: linear-gradient(to bottom, rgba(45,74,62,0.98) 60%, transparent);
+  }
+  .pile-focus-bar.show { display: flex; }
+  .pfb-back {
+    background: rgba(255,255,255,0.15); border: none; color: white;
+    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600;
+    padding: 8px 14px; border-radius: 100px; cursor: pointer;
+    transition: background 0.2s; white-space: nowrap;
+  }
+  .pfb-back:active { background: rgba(255,255,255,0.3); }
+  .pfb-label {
+    font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 800;
+    color: white; letter-spacing: 0.5px; flex: 1;
+  }
+  .pfb-count { font-size: 11px; color: rgba(255,255,255,0.55); font-weight: 500; }
+
+  /* flick direction hint badges */
+  .flick-hint {
+    position: absolute; z-index: 250;
+    font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 800;
+    letter-spacing: 0.3px; padding: 8px 18px; border-radius: 100px;
+    opacity: 0; pointer-events: none; transition: opacity 0.12s;
+    backdrop-filter: blur(6px);
+  }
+  .flick-left  { left: 14px;   top: 50%; transform: translateY(-50%); background: rgba(255,215,10,0.22); color: #ffd60a; border: 1.5px solid rgba(255,215,10,0.5); }
+  .flick-right { right: 14px;  top: 50%; transform: translateY(-50%); background: rgba(48,209,88,0.18);  color: #30d158; border: 1.5px solid rgba(48,209,88,0.5); }
+  .flick-up    { top: 90px;    left: 50%; transform: translateX(-50%); background: rgba(10,132,255,0.18); color: #0a84ff; border: 1.5px solid rgba(10,132,255,0.4); }
+  .flick-down  { bottom: 140px;left: 50%; transform: translateX(-50%); background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.55); border: 1.5px solid rgba(255,255,255,0.2); }
+
+  /* intent action bar at bottom */
+  .pile-intent-bar {
+    position: absolute; bottom: 72px; left: 0; right: 0; z-index: 200;
+    display: none; justify-content: center; gap: 10px; padding: 0 16px;
+  }
+  .pile-intent-bar.show { display: flex; }
+  .pib-btn {
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    padding: 11px 12px; border-radius: 16px; border: none; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; font-size: 9px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.3px;
+    transition: transform 0.18s, box-shadow 0.18s;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.35);
+    flex: 1; max-width: 80px;
+  }
+  .pib-btn:active { transform: scale(0.9); }
+  .pib-btn:hover  { transform: scale(1.06); }
+  .pib-btn span   { font-size: 20px; display: block; }
+  .pib-btn.save    { background: #2c2c2e; color: rgba(255,255,255,0.8); }
+  .pib-btn.details { background: #1c3a5e; color: rgba(255,255,255,0.9); }
+  .pib-btn.offer   { background: var(--accent); color: white; box-shadow: 0 6px 24px rgba(232,68,10,0.55); transform: scale(1.08); max-width: 90px; }
+  .pib-btn.offer:hover  { transform: scale(1.14); }
+  .pib-btn.offer:active { transform: scale(0.95); }
+  .pib-btn.skip    { background: rgba(255,255,255,0.09); color: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.15); }
+
+  /* intent stamp on card while dragging in pile mode */
+  .intent-stamp {
+    position: absolute; top: 16px; left: 50%; transform: translateX(-50%);
+    font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 900;
+    letter-spacing: 1px; padding: 4px 14px; border-radius: 6px; border: 3px solid;
+    opacity: 0; pointer-events: none; z-index: 20; text-transform: uppercase;
+    transition: opacity 0.1s; white-space: nowrap;
+  }
+
+  /* per-pile check button overlaid on stacked cards */
+  .pile-stack-btn {
+    position: absolute; z-index: 200;
+    transform: translateX(-50%);
+    background: var(--ink); color: white; border: none;
+    border-radius: 100px; padding: 9px 16px;
+    font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700;
+    cursor: pointer; white-space: nowrap;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.45);
+    transition: transform 0.2s, background 0.2s;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .pile-stack-btn:hover  { background: var(--accent); transform: translateX(-50%) scale(1.06); }
+  .pile-stack-btn:active { transform: translateX(-50%) scale(0.96); }
+  .pile-stack-btn .psb-count {
+    background: rgba(255,255,255,0.2); border-radius: 100px;
+    padding: 1px 7px; font-size: 10px; font-weight: 700;
+  }
+
+  .arrange-panel {
+    position: absolute;
+    top: 90px;
+    right: 16px;
+    z-index: 110;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .arrange-btn {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 14px;
+    border-radius: 100px;
+    background: rgba(255,255,255,0.18);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.25);
+    color: white;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    white-space: nowrap;
+  }
+
+  .arrange-btn:active { transform: scale(0.95); background: rgba(255,255,255,0.3); }
+  .arrange-btn .btn-icon { font-size: 14px; }
+
+  .card-photo {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    display: block;
+    background: var(--tag-bg);
+    position: relative;
+  }
+
+  .card-photo-placeholder {
+    width: 100%;
+    aspect-ratio: 1;
+    background: linear-gradient(135deg, #f0ebe0, #e8e0d0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+  }
+
+  .card-body {
+    padding: 8px 10px 10px;
+  }
+
+  .card-category {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 3px;
+  }
+
+  .card-desc {
+    font-size: 11px;
+    color: var(--ink);
+    font-weight: 500;
+    line-height: 1.3;
+    margin-bottom: 7px;
+  }
+
+  .card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .card-location {
+    font-size: 9px;
+    color: var(--ink-soft);
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .card-interest-btn {
+    font-size: 13px;
+    cursor: pointer;
+    transition: transform 0.2s;
+    line-height: 1;
+  }
+
+  .card-interest-btn:active { transform: scale(1.4); }
+
+  /* interest count badge */
+  .interest-badge {
+    background: var(--accent);
+    color: white;
+    font-size: 8px;
+    font-weight: 700;
+    border-radius: 100px;
+    padding: 2px 5px;
+    min-width: 16px;
+    text-align: center;
+  }
+
+  /* category filter on table */
+  .table-cat-bar {
+    position: absolute;
+    bottom: 28px;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 0 20px;
+    scrollbar-width: none;
+  }
+
+  .table-cat-bar::-webkit-scrollbar { display: none; }
+
+  .table-cat-pill {
+    flex-shrink: 0;
+    padding: 8px 14px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    background: rgba(255,255,255,0.15);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.2);
+    backdrop-filter: blur(8px);
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .table-cat-pill.active {
+    background: white;
+    color: var(--felt);
+  }
+
+  /* ── SNAP VIEW ── */
+  #snapView {
+    display: flex;
+    flex-direction: column;
+    background: #111;
+  }
+
+  .snap-header {
+    padding: 52px 20px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-shrink: 0;
+  }
+
+  .snap-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: white;
+  }
+
+  .camera-area {
+    flex: 1;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .camera-preview {
+    flex: 1;
+    background: #1a1a1a;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: rgba(255,255,255,0.4);
+    font-size: 13px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* simulated camera viewfinder */
+  .viewfinder {
+    width: 200px;
+    height: 200px;
+    position: relative;
+  }
+
+  .viewfinder::before, .viewfinder::after {
+    content: '';
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    border-color: rgba(255,255,255,0.6);
+    border-style: solid;
+  }
+
+  .viewfinder::before {
+    top: 0; left: 0;
+    border-width: 2px 0 0 2px;
+  }
+
+  .viewfinder::after {
+    bottom: 0; right: 0;
+    border-width: 0 2px 2px 0;
+  }
+
+  .vf-corner-tr {
+    position: absolute;
+    top: 0; right: 0;
+    width: 30px; height: 30px;
+    border-top: 2px solid rgba(255,255,255,0.6);
+    border-right: 2px solid rgba(255,255,255,0.6);
+  }
+
+  .vf-corner-bl {
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 30px; height: 30px;
+    border-bottom: 2px solid rgba(255,255,255,0.6);
+    border-left: 2px solid rgba(255,255,255,0.6);
+  }
+
+  .snap-controls {
+    padding: 20px 24px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+    flex-shrink: 0;
+  }
+
+  .shutter-btn {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: white;
+    border: none;
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.15s;
+  }
+
+  .shutter-btn::after {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    border-radius: 50%;
+    border: 2px solid #333;
+  }
+
+  .shutter-btn:active { transform: scale(0.92); }
+
+  .snap-side-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+  }
+
+  /* snapped photo queue */
+  .snap-queue {
+    position: absolute;
+    bottom: 100px;
+    left: 0;
+    right: 0;
+    display: flex;
+    gap: 8px;
+    padding: 0 20px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .snap-queue::-webkit-scrollbar { display: none; }
+
+  .snap-thumb {
+    flex-shrink: 0;
+    width: 60px;
+    height: 60px;
+    border-radius: 10px;
+    border: 2px solid rgba(255,255,255,0.4);
+    overflow: hidden;
+    font-size: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #2a2a2a;
+    position: relative;
+  }
+
+  .snap-thumb .ml-tag {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(232,68,10,0.9);
+    color: white;
+    font-size: 7px;
+    font-weight: 700;
+    text-align: center;
+    padding: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* ML processing overlay */
+  .ml-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    z-index: 200;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+  }
+
+  .ml-overlay.show {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .ml-spinner {
+    width: 48px;
+    height: 48px;
+    border: 3px solid rgba(255,255,255,0.2);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .ml-status {
+    color: white;
+    font-size: 14px;
+    font-weight: 500;
+    text-align: center;
+  }
+
+  .ml-tag-reveal {
+    background: var(--accent);
+    color: white;
+    padding: 8px 20px;
+    border-radius: 100px;
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards;
+    opacity: 0;
+  }
+
+  @keyframes popIn {
+    from { transform: scale(0.5); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  /* card detail modal */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 500;
+    display: flex;
+    align-items: flex-end;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    backdrop-filter: blur(4px);
+  }
+
+  .modal-overlay.show {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .modal-sheet {
+    width: 100%;
+    background: var(--surface);
+    border-radius: 24px 24px 0 0;
+    padding: 0 0 40px;
+    transform: translateY(100%);
+    transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .modal-overlay.show .modal-sheet {
+    transform: translateY(0);
+  }
+
+  .modal-handle {
+    width: 40px;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin: 12px auto;
+  }
+
+  .modal-photo {
+    width: 100%;
+    aspect-ratio: 4/3;
+    object-fit: cover;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 72px;
+    background: linear-gradient(135deg, #f0ebe0, #e0d8c8);
+  }
+
+  .modal-body {
+    padding: 20px 24px;
+  }
+
+  .modal-cat {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+
+  .modal-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 8px;
+    line-height: 1.2;
+  }
+
+  .modal-meta {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .modal-meta-item {
+    font-size: 12px;
+    color: var(--ink-soft);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .modal-note {
+    background: var(--tag-bg);
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin-bottom: 20px;
+    border-left: 3px solid var(--accent);
+    font-style: italic;
+  }
+
+  .modal-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 20px;
+  }
+
+  .modal-tag {
+    padding: 5px 12px;
+    background: var(--tag-bg);
+    border-radius: 100px;
+    font-size: 11px;
+    color: var(--ink-soft);
+    font-weight: 500;
+  }
+
+  .interest-big-btn {
+    width: 100%;
+    padding: 16px;
+    border-radius: 16px;
+    background: var(--ink);
+    color: white;
+    border: none;
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.15s, background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .interest-big-btn:active { transform: scale(0.98); }
+  .interest-big-btn.interested { background: var(--accent); }
+
+  /* toast */
+  .toast {
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--ink);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 500;
+    z-index: 999;
+    opacity: 0;
+    transition: all 0.3s;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* ── BOTTOM NAV ── */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 300;
+    background: var(--surface);
+    border-top: 1.5px solid var(--border);
+    display: flex;
+    padding: 8px 0 20px;
+  }
+
+  .nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 6px 0;
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+
+  .nav-item:active { transform: scale(0.92); }
+
+  .nav-icon { font-size: 22px; line-height: 1; }
+
+  .nav-label {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+
+  .nav-item.active .nav-label { color: var(--accent); }
+  .nav-item.active .nav-icon { filter: drop-shadow(0 0 4px rgba(232,68,10,0.4)); }
+
+  /* ML analysis bar */
+  .ml-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--accent);
+    transform-origin: left;
+    transform: scaleX(0);
+    transition: transform 1s ease;
+  }
+
+  /* interest animation */
+  @keyframes heartPop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.6); }
+    100% { transform: scale(1); }
+  }
+
+  .heart-pop { animation: heartPop 0.4s cubic-bezier(0.34,1.56,0.64,1); }
+
+  /* scroll container for home */
+  .home-scroll {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .search-results-bar {
+    padding: 10px 24px 0;
+    font-size: 13px;
+    color: var(--ink-soft);
+    font-style: italic;
+  }
+</style>
+</head>
+<body>
+
+<!-- ── HOME VIEW ── -->
+<div class="view visible" id="homeView">
+  <div class="home-header">
+    <div class="wordmark">Snap<span>Drop</span></div>
+    <div class="tagline">Just snap it. Your city will tell you if they want it.</div>
+
+    <div class="mood-bar">
+      <span class="mic-icon" onclick="activateMic()" id="micIcon">🎙️</span>
+      <input class="mood-input" id="moodInput" type="text" placeholder="What are you in the mood for?" 
+             oninput="onMoodInput(this.value)" onkeydown="if(event.key==='Enter')doSearch()">
+      <button class="mood-btn" onclick="doSearch()">Find</button>
+    </div>
+  </div>
+
+  <div class="cat-scroll" id="catScroll">
+    <div class="cat-pill active" onclick="filterCat(this,'all')">✨ All</div>
+    <div class="cat-pill" onclick="filterCat(this,'summer')">☀️ Summer Things</div>
+    <div class="cat-pill" onclick="filterCat(this,'bedroom')">🛏️ Bedroom</div>
+    <div class="cat-pill" onclick="filterCat(this,'kitchen')">🍳 Kitchen</div>
+    <div class="cat-pill" onclick="filterCat(this,'kids')">🧸 Kids</div>
+    <div class="cat-pill" onclick="filterCat(this,'outdoors')">🌿 Outdoors</div>
+    <div class="cat-pill" onclick="filterCat(this,'tech')">📱 Tech</div>
+    <div class="cat-pill" onclick="filterCat(this,'clothes')">👗 Clothes</div>
+    <div class="cat-pill" onclick="filterCat(this,'sports')">⚽ Sports</div>
+  </div>
+
+  <div class="home-actions">
+    <div class="action-card snap-card" onclick="goTo('snap')">
+      <div class="action-emoji">📷</div>
+      <div class="action-label">Snap & Drop</div>
+      <div class="action-sub">Just take a photo</div>
+    </div>
+    <div class="action-card browse-card" onclick="goTo('table')">
+      <div class="action-emoji">🗃️</div>
+      <div class="action-label">Look Around</div>
+      <div class="action-sub">Browse the table</div>
+    </div>
+  </div>
+
+  <div class="home-scroll">
+    <div class="search-results-bar" id="searchResultsBar" style="display:none"></div>
+    <div class="section-label" id="gridLabel">NEAR YOU IN OTTAWA</div>
+    <div class="items-grid" id="itemsGrid"></div>
+  </div>
+</div>
+
+<!-- ── TABLE VIEW ── -->
+<div class="view hidden-right" id="tableView">
+  <div class="felt-surface"></div>
+  <div class="felt-dots"></div>
+
+  <div class="table-header">
+    <button class="back-btn" onclick="goTo('home')">←</button>
+    <div>
+      <div class="table-title">The Table</div>
+      <div class="table-subtitle">Drag cards · Tap to see details</div>
+    </div>
+  </div>
+
+  <div class="table-surface" id="tableSurface"></div>
+
+  <!-- arrange panel -->
+  <div class="arrange-panel">
+    <button class="arrange-btn" onclick="arrangeByCategory()">
+      <span class="btn-icon">📂</span> By Category
+    </button>
+    <button class="arrange-btn" onclick="arrangeByDistance()">
+      <span class="btn-icon">📍</span> By Distance
+    </button>
+    <button class="arrange-btn" onclick="arrangeScatter()">
+      <span class="btn-icon">🎲</span> Scatter
+    </button>
+  </div>
+
+  <!-- pile focus UI — floats over the zoomed table, no separate overlay -->
+  <div class="pile-focus-bar" id="pileFocusBar">
+    <button class="pfb-back" onclick="closePileViewer()">← Back to table</button>
+    <div class="pfb-label" id="pfbLabel">KIDS</div>
+    <div class="pfb-count" id="pfbCount"></div>
+  </div>
+
+  <!-- intent hint labels that appear while flicking -->
+  <div class="flick-hint flick-left"  id="flickLeft">🔖 Save</div>
+  <div class="flick-hint flick-right" id="flickRight">💸 Offer</div>
+  <div class="flick-hint flick-up"    id="flickUp">💬 Ask</div>
+  <div class="flick-hint flick-down"  id="flickDown">⏭ Skip</div>
+
+  <!-- intent action bar at bottom of focused pile -->
+  <div class="pile-intent-bar" id="pileIntentBar">
+    <button class="pib-btn save"    onclick="commitPileAction('save')">   🔖<span>Save</span></button>
+    <button class="pib-btn details" onclick="commitPileAction('details')">💬<span>Ask Details</span></button>
+    <button class="pib-btn offer"   onclick="commitPileAction('offer')">  💸<span>Make Offer</span></button>
+    <button class="pib-btn skip"    onclick="commitPileAction('skip')">   ⏭<span>Skip</span></button>
+  </div>
+
+  <div class="table-cat-bar" id="tableCatBar">
+    <div class="table-cat-pill active" onclick="tableFilter(this,'all')">All Items</div>
+    <div class="table-cat-pill" onclick="tableFilter(this,'summer')">☀️ Summer</div>
+    <div class="table-cat-pill" onclick="tableFilter(this,'bedroom')">🛏️ Bedroom</div>
+    <div class="table-cat-pill" onclick="tableFilter(this,'kitchen')">🍳 Kitchen</div>
+    <div class="table-cat-pill" onclick="tableFilter(this,'kids')">🧸 Kids</div>
+    <div class="table-cat-pill" onclick="tableFilter(this,'tech')">📱 Tech</div>
+    <div class="table-cat-pill" onclick="tableFilter(this,'clothes')">👗 Clothes</div>
+  </div>
+</div>
+
+<!-- ── SNAP VIEW ── -->
+<div class="view hidden-right" id="snapView">
+  <div class="snap-header">
+    <button class="back-btn" style="background:rgba(255,255,255,0.15)" onclick="goTo('home')">←</button>
+    <div class="snap-title">Snap &amp; Drop</div>
+  </div>
+
+  <div class="camera-area">
+    <div class="camera-preview" id="cameraPreview">
+      <div class="viewfinder">
+        <div class="vf-corner-tr"></div>
+        <div class="vf-corner-bl"></div>
+      </div>
+      <div style="color:rgba(255,255,255,0.5);font-size:13px;margin-top:8px;">Point at anything to sell</div>
+
+      <div class="snap-queue" id="snapQueue"></div>
+    </div>
+
+    <div class="ml-overlay" id="mlOverlay">
+      <div class="ml-spinner"></div>
+      <div class="ml-status" id="mlStatus">Analysing photo...</div>
+      <div class="ml-tag-reveal" id="mlTagReveal" style="display:none"></div>
+    </div>
+  </div>
+
+  <div class="snap-controls">
+    <button class="snap-side-btn">🖼️</button>
+    <button class="shutter-btn" onclick="doSnap()"></button>
+    <button class="snap-side-btn" onclick="goTo('table')">🗃️</button>
+  </div>
+</div>
+
+<!-- ── CARD DETAIL MODAL ── -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal-sheet" id="modalSheet">
+    <div class="modal-handle"></div>
+    <div class="modal-photo" id="modalPhoto"></div>
+    <div class="modal-body">
+      <div class="modal-cat" id="modalCat"></div>
+      <div class="modal-title" id="modalTitle"></div>
+      <div class="modal-meta">
+        <div class="modal-meta-item">📍 <span id="modalLocation"></span></div>
+        <div class="modal-meta-item">⏱️ <span id="modalTime"></span></div>
+        <div class="modal-meta-item">👀 <span id="modalInterest"></span> interested</div>
+      </div>
+      <div class="modal-note" id="modalNote"></div>
+      <div class="modal-tags" id="modalTags"></div>
+      <button class="interest-big-btn" id="interestBigBtn" onclick="toggleInterestModal()">
+        <span>👋</span> <span id="interestBtnText">I'm Interested</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── BOTTOM NAV ── -->
+<div class="bottom-nav">
+  <div class="nav-item active" onclick="goTo('home')" id="navHome">
+    <div class="nav-icon">🏠</div>
+    <div class="nav-label">Home</div>
+  </div>
+  <div class="nav-item" onclick="goTo('table')" id="navTable">
+    <div class="nav-icon">🗃️</div>
+    <div class="nav-label">Table</div>
+  </div>
+  <div class="nav-item" onclick="goTo('snap')" id="navSnap">
+    <div class="nav-icon">📷</div>
+    <div class="nav-label">Snap</div>
+  </div>
+  <div class="nav-item" onclick="showToast('Notifications coming soon!')" id="navNotif">
+    <div class="nav-icon">🔔</div>
+    <div class="nav-label">Alerts</div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── DATA ────────────────────────────────────────────────────────────────────
+const ITEMS = [
+  {
+    id: 1, emoji: '🪴', category: 'outdoors', catLabel: 'Outdoors',
+    title: 'Fiddle Leaf Fig — Big One',
+    location: 'Westboro', time: '2h ago',
+    interest: 3, interested: false,
+    note: 'Moving to a smaller place. It\'s healthy and huge.',
+    tags: ['Plant', 'Indoor', 'Large', 'Green', 'Décor'],
+    color: '#e8f5e9'
+  },
+  {
+    id: 2, emoji: '🎿', category: 'summer', catLabel: 'Summer Things',
+    title: 'K2 Skis + Poles',
+    location: 'Kanata', time: '45m ago',
+    interest: 7, interested: false,
+    note: 'Used two seasons. Adult size 170cm.',
+    tags: ['Ski', 'Winter Sports', 'K2', 'Adult', 'Blue'],
+    color: '#e3f2fd'
+  },
+  {
+    id: 3, emoji: '🛋️', category: 'bedroom', catLabel: 'Bedroom',
+    title: 'IKEA Ektorp Sofa — Grey',
+    location: 'Findlay Creek', time: '1d ago',
+    interest: 12, interested: false,
+    note: 'Clean, no pets, no smoke. You pick up.',
+    tags: ['Sofa', 'Grey', 'IKEA', 'Living Room', 'Large'],
+    color: '#f3e5f5'
+  },
+  {
+    id: 4, emoji: '🍳', category: 'kitchen', catLabel: 'Kitchen',
+    title: 'Le Creuset Dutch Oven',
+    location: 'Hunt Club', time: '3h ago',
+    interest: 9, interested: false,
+    note: 'Got a duplicate as a gift. Barely used.',
+    tags: ['Cast Iron', 'Red', 'Cooking', 'Le Creuset', 'Premium'],
+    color: '#fff3e0'
+  },
+  {
+    id: 5, emoji: '🧸', category: 'kids', catLabel: 'Kids',
+    title: 'Bag of 4T Boy Clothes',
+    location: 'Stittsville', time: '5h ago',
+    interest: 2, interested: false,
+    note: 'Outgrown. Good condition. Mixed brands.',
+    tags: ['Kids', 'Clothes', '4T', 'Boys', 'Bundle'],
+    color: '#fce4ec'
+  },
+  {
+    id: 6, emoji: '📱', category: 'tech', catLabel: 'Tech',
+    title: 'iPad Air Gen 4 — 64GB',
+    location: 'Barrhaven', time: '30m ago',
+    interest: 18, interested: false,
+    note: 'Screen replaced 6 months ago. Works perfectly.',
+    tags: ['Apple', 'iPad', 'Tablet', 'Space Grey', 'Electronics'],
+    color: '#e8eaf6'
+  },
+  {
+    id: 7, emoji: '🚲', category: 'outdoors', catLabel: 'Outdoors',
+    title: 'Trek Marlin 5 Mountain Bike',
+    location: 'Westboro', time: '2d ago',
+    interest: 5, interested: false,
+    note: 'Size medium. Some trail wear on the frame.',
+    tags: ['Bike', 'Trek', 'Mountain', 'Adult', 'Blue'],
+    color: '#e0f2f1'
+  },
+  {
+    id: 8, emoji: '👗', category: 'clothes', catLabel: 'Clothes',
+    title: 'Lululemon Bundle — Size 6',
+    location: 'Orleans', time: '6h ago',
+    interest: 4, interested: false,
+    note: '5 pieces. Leggings, sports bras. All size 6.',
+    tags: ['Lululemon', 'Women', 'Size 6', 'Athletic', 'Bundle'],
+    color: '#f9fbe7'
+  },
+  {
+    id: 9, emoji: '🎸', category: 'tech', catLabel: 'Tech',
+    title: 'Fender Acoustic Guitar',
+    location: 'Glebe', time: '1d ago',
+    interest: 6, interested: false,
+    note: 'CD-60S. Barely played. Comes with case.',
+    tags: ['Guitar', 'Fender', 'Acoustic', 'Music', 'Beginner'],
+    color: '#fff8e1'
+  },
+  {
+    id: 10, emoji: '⛺', category: 'summer', catLabel: 'Summer Things',
+    title: 'MEC 4-Person Tent',
+    location: 'Kanata', time: '4h ago',
+    interest: 8, interested: false,
+    note: 'Used twice. All pegs included. Dry stored.',
+    tags: ['Camping', 'MEC', 'Tent', 'Outdoor', 'Family'],
+    color: '#e8f5e9'
+  },
+  {
+    id: 11, emoji: '🪑', category: 'outdoors', catLabel: 'Outdoors',
+    title: 'Patio Set — 4 Chairs + Table',
+    location: 'Manotick', time: '3d ago',
+    interest: 11, interested: false,
+    note: 'Metal frame, weathered look. Good bones.',
+    tags: ['Patio', 'Outdoor', 'Furniture', 'Brown', 'Metal'],
+    color: '#efebe9'
+  },
+  {
+    id: 12, emoji: '🍼', category: 'kids', catLabel: 'Kids',
+    title: 'Graco Stroller — Navy',
+    location: 'Barrhaven', time: '1d ago',
+    interest: 3, interested: false,
+    note: 'Good condition. Canopy fades slightly.',
+    tags: ['Baby', 'Stroller', 'Graco', 'Navy', 'Kids'],
+    color: '#e3f2fd'
+  },
+  {
+    id: 13, emoji: '🎮', category: 'tech', catLabel: 'Tech',
+    title: 'Nintendo Switch + 3 Games',
+    location: 'Hunt Club', time: '2h ago',
+    interest: 22, interested: false,
+    note: 'Zelda, Mario Kart, Animal Crossing included.',
+    tags: ['Nintendo', 'Gaming', 'Console', 'Bundle', 'Electronics'],
+    color: '#fce4ec'
+  },
+  {
+    id: 14, emoji: '🏋️', category: 'sports', catLabel: 'Sports',
+    title: 'Adjustable Dumbbells — 5-25lb',
+    location: 'Nepean', time: '5h ago',
+    interest: 14, interested: false,
+    note: 'Bowflex SelectTech. Saved during pandemic.',
+    tags: ['Fitness', 'Weights', 'Bowflex', 'Home Gym', 'Adjustable'],
+    color: '#f3e5f5'
+  },
+  {
+    id: 15, emoji: '🛏️', category: 'bedroom', catLabel: 'Bedroom',
+    title: 'Queen Bed Frame — Wood',
+    location: 'Orleans', time: '4d ago',
+    interest: 7, interested: false,
+    note: 'IKEA Hemnes, white stain. Solid condition.',
+    tags: ['Bedroom', 'Queen', 'IKEA', 'White', 'Wood'],
+    color: '#fff3e0'
+  },
+  {
+    id: 16, emoji: '🧩', category: 'kids', catLabel: 'Kids',
+    title: 'Box of Board Games',
+    location: 'Westboro', time: '8h ago',
+    interest: 5, interested: false,
+    note: 'Settlers, Ticket to Ride, Pandemic. All complete.',
+    tags: ['Games', 'Family', 'Bundle', 'Box', 'Fun'],
+    color: '#e8eaf6'
+  },
+];
+
+// snap demo items
+const SNAP_DEMOS = [
+  { emoji: '👟', category: 'Footwear', tags: ['Nike', 'Shoes', 'White', 'Size 10'] },
+  { emoji: '📚', category: 'Books', tags: ['Hardcover', 'Fiction', 'Bundle'] },
+  { emoji: '🖥️', category: 'Tech', tags: ['Monitor', 'Electronics', 'Desktop'] },
+  { emoji: '🌱', category: 'Plants', tags: ['Succulent', 'Indoor', 'Small', 'Green'] },
+  { emoji: '🎒', category: 'Bags', tags: ['Backpack', 'Black', 'Medium'] },
+  { emoji: '🛁', category: 'Home', tags: ['Bathroom', 'Décor', 'White'] },
+];
+
+// ── STATE ────────────────────────────────────────────────────────────────────
+let currentView = 'home';
+let activeCategory = 'all';
+let tableCategory = 'all';
+let modalItemId = null;
+let snapQueue = [];
+let snapDemoIdx = 0;
+let tableCards = [];
+let draggingCard = null;
+let dragOffX = 0, dragOffY = 0;
+let maxZ = 100;
+
+// ── NAVIGATION ───────────────────────────────────────────────────────────────
+function goTo(view) {
+  const views = { home: 'homeView', table: 'tableView', snap: 'snapView' };
+  const navItems = { home: 'navHome', table: 'navTable', snap: 'navSnap' };
+  const order = ['home', 'table', 'snap'];
+
+  const fromIdx = order.indexOf(currentView);
+  const toIdx   = order.indexOf(view);
+
+  Object.entries(views).forEach(([k, id]) => {
+    const el = document.getElementById(id);
+    if (k === view) {
+      el.className = 'view visible';
+    } else if (order.indexOf(k) < toIdx) {
+      el.className = 'view hidden-left';
+    } else {
+      el.className = 'view hidden-right';
+    }
+  });
+
+  Object.entries(navItems).forEach(([k, id]) => {
+    document.getElementById(id).className = 'nav-item' + (k === view ? ' active' : '');
+  });
+
+  currentView = view;
+
+  if (view === 'table' && tableCards.length === 0) buildTableCards();
+}
+
+// ── HOME GRID ────────────────────────────────────────────────────────────────
+function renderGrid(items) {
+  const grid = document.getElementById('itemsGrid');
+  grid.innerHTML = items.map(item => `
+    <div class="grid-item" onclick="openModal(${item.id})" style="background:${item.color}">
+      <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:42px;">${item.emoji}</div>
+      <div class="item-cat-tag">${item.catLabel}</div>
+      ${item.interest > 5 ? '<div class="interest-dot"></div>' : ''}
+    </div>
+  `).join('');
+}
+
+function filterCat(el, cat) {
+  document.querySelectorAll('#catScroll .cat-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  activeCategory = cat;
+  document.getElementById('moodInput').value = '';
+  document.getElementById('searchResultsBar').style.display = 'none';
+  document.getElementById('gridLabel').textContent = 'NEAR YOU IN OTTAWA';
+
+  const filtered = cat === 'all' ? ITEMS : ITEMS.filter(i => i.category === cat);
+  renderGrid(filtered);
+}
+
+// ── MOOD SEARCH ───────────────────────────────────────────────────────────────
+const SEARCH_MAP = {
+  'jewel': ['bedroom','clothes'], 'necklace': ['clothes'], 'ring': ['clothes'],
+  'furniture': ['bedroom'], 'couch': ['bedroom'], 'sofa': ['bedroom'], 'chair': ['outdoors'],
+  'baby': ['kids'], 'child': ['kids'], 'kid': ['kids'], 'toy': ['kids'],
+  'bike': ['outdoors','sports'], 'outdoor': ['outdoors'], 'plant': ['outdoors'],
+  'phone': ['tech'], 'laptop': ['tech'], 'computer': ['tech'], 'ipad': ['tech'], 'tablet': ['tech'],
+  'clothes': ['clothes'], 'shirt': ['clothes'], 'pants': ['clothes'], 'jacket': ['clothes'],
+  'kitchen': ['kitchen'], 'cooking': ['kitchen'], 'pot': ['kitchen'],
+  'summer': ['summer'], 'camping': ['summer'], 'ski': ['summer'],
+  'cute': [], 'nice': [], 'good': [], 'great': [], 'cheap': [],
+  'blue': [], 'red': [], 'white': [], 'black': [],
+};
+
+function onMoodInput(val) {
+  if (val.length > 2) {
+    // real-time suggestion could go here
+  }
+}
+
+function doSearch() {
+  const query = document.getElementById('moodInput').value.trim().toLowerCase();
+  if (!query) return;
+
+  const words = query.split(/\s+/);
+  let matchedCats = new Set();
+  let tagMatches = [];
+
+  words.forEach(w => {
+    Object.entries(SEARCH_MAP).forEach(([key, cats]) => {
+      if (w.includes(key) || key.includes(w)) {
+        cats.forEach(c => matchedCats.add(c));
+      }
+    });
+  });
+
+  let results = ITEMS.filter(item => {
+    const inCat = matchedCats.size === 0 || matchedCats.has(item.category);
+    const inTags = item.tags.some(t => words.some(w => t.toLowerCase().includes(w)));
+    const inTitle = words.some(w => item.title.toLowerCase().includes(w));
+    return inCat || inTags || inTitle;
+  });
+
+  if (results.length === 0) results = ITEMS.slice(0, 6);
+
+  const bar = document.getElementById('searchResultsBar');
+  bar.style.display = 'block';
+  bar.textContent = `AI found ${results.length} results for "${query}"`;
+  document.getElementById('gridLabel').textContent = 'SEARCH RESULTS';
+
+  renderGrid(results);
+  showToast(`🔍 Found ${results.length} items near you`);
+}
+
+function activateMic() {
+  const icon = document.getElementById('micIcon');
+  const input = document.getElementById('moodInput');
+
+  if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const rec = new SR();
+    rec.lang = 'en-CA';
+    rec.interimResults = false;
+    icon.textContent = '🔴';
+    rec.onresult = e => {
+      input.value = e.results[0][0].transcript;
+      icon.textContent = '🎙️';
+      doSearch();
+    };
+    rec.onerror = () => { icon.textContent = '🎙️'; };
+    rec.onend   = () => { icon.textContent = '🎙️'; };
+    rec.start();
+  } else {
+    // demo fallback
+    const demos = ['cute jewelry', 'kids stuff', 'something for the bedroom', 'outdoor furniture'];
+    input.value = demos[Math.floor(Math.random() * demos.length)];
+    icon.textContent = '🎙️';
+    setTimeout(doSearch, 300);
+  }
+}
+
+// ── TABLE CARDS ───────────────────────────────────────────────────────────────
+function buildTableCards() {
+  const surface = document.getElementById('tableSurface');
+  const w = surface.offsetWidth  || window.innerWidth;
+  const h = surface.offsetHeight || window.innerHeight;
+
+  tableCards = ITEMS.map((item, i) => {
+    const x = 20 + Math.random() * (w - 180);
+    const y = 80 + Math.random() * (h - 260);
+    const rot = (Math.random() - 0.5) * 20;
+    return { ...item, x, y, rot, z: i + 1 };
+  });
+
+  renderTableCards();
+  setupTableDrag();
+}
+
+function renderTableCards() {
+  const surface = document.getElementById('tableSurface');
+  const filter = tableCategory;
+
+  surface.innerHTML = tableCards.map(card => {
+    const hidden = filter !== 'all' && card.category !== filter;
+    return `
+    <div class="table-card"
+         id="tc_${card.id}"
+         style="
+           left:${card.x}px;
+           top:${card.y}px;
+           transform:rotate(${card.rot}deg);
+           z-index:${card.z};
+           display:${hidden ? 'none' : 'block'};
+         "
+         onmousedown="startDrag(event,${card.id})"
+         ontouchstart="startDrag(event,${card.id})">
+      <div class="card-photo-placeholder" style="background:${card.color}">${card.emoji}</div>
+      <div class="card-body">
+        <div class="card-category">${card.catLabel}</div>
+        <div class="card-desc">${card.title}</div>
+        <div class="card-footer">
+          <div class="card-location">📍${card.location}</div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span class="card-interest-btn"
+              onmousedown="stopProp(event)"
+              ontouchstart="stopProp(event)"
+              onmouseup="stopProp(event)"
+              ontouchend="quickInterestDirect(event,${card.id})">❤️</span>
+            ${card.interest > 0 ? `<span class="interest-badge" id="ibadge_${card.id}">${card.interest}</span>` : `<span class="interest-badge" id="ibadge_${card.id}" style="display:none">0</span>`}
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function stopProp(e) { e.stopPropagation(); }
+
+function tableFilter(el, cat) {
+  document.querySelectorAll('.table-cat-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  tableCategory = cat;
+
+  tableCards.forEach(card => {
+    const el = document.getElementById('tc_' + card.id);
+    if (!el) return;
+    el.style.display = (cat === 'all' || card.category === cat) ? 'block' : 'none';
+  });
+}
+
+// ── DRAG — click vs drag discrimination ──────────────────────────────────────
+let dragStartPos  = { x: 0, y: 0 };
+let dragStartTime = 0;
+let dragHasMoved  = false;
+let pendingCardId = null;
+
+const DRAG_THRESHOLD = 8;    // px — must move this far to become a drag
+const TAP_MAX_MS     = 220;  // ms — press must be shorter than this to count as a tap
+
+function setupTableDrag() {
+  document.addEventListener('mousemove', onDragMove);
+  document.addEventListener('mouseup',   onDragEnd);
+  document.addEventListener('touchmove', onDragMove, { passive: false });
+  document.addEventListener('touchend',  onDragEnd);
+}
+
+function startDrag(e, id) {
+  e.stopPropagation();
+  const el = document.getElementById('tc_' + id);
+  if (!el) return;
+
+  pendingCardId = id;
+  dragHasMoved  = false;
+  dragStartTime = Date.now();
+
+  const pos = getPos(e);
+  dragStartPos = { x: pos.x, y: pos.y };
+
+  const rect = el.getBoundingClientRect();
+  dragOffX = pos.x - rect.left;
+  dragOffY = pos.y - rect.top;
+}
+
+function onDragMove(e) {
+  if (pendingCardId === null && !draggingCard) return;
+  e.preventDefault();
+
+  const pos = getPos(e);
+  const dx  = Math.abs(pos.x - dragStartPos.x);
+  const dy  = Math.abs(pos.y - dragStartPos.y);
+
+  // once threshold crossed, lock in as a drag — never revert
+  if (!draggingCard && pendingCardId !== null && (dx > DRAG_THRESHOLD || dy > DRAG_THRESHOLD)) {
+    const el = document.getElementById('tc_' + pendingCardId);
+    if (!el) return;
+    dragHasMoved = true;
+    draggingCard = { id: pendingCardId, el };
+    maxZ++;
+    el.style.zIndex = maxZ;
+    el.classList.remove('dropping', 'arranging');
+    el.classList.add('dragging');
+    const card = tableCards.find(c => c.id === pendingCardId);
+    if (card) card.z = maxZ;
+  }
+
+  if (!draggingCard) return;
+
+  const surface = document.getElementById('tableSurface');
+  const rect    = surface.getBoundingClientRect();
+  const x = pos.x - rect.left - dragOffX;
+  const y = pos.y - rect.top  - dragOffY;
+  draggingCard.el.style.left = x + 'px';
+  draggingCard.el.style.top  = y + 'px';
+
+  const card = tableCards.find(c => c.id === draggingCard.id);
+  if (card) { card.x = x; card.y = y; }
+}
+
+function onDragEnd(e) {
+  const elapsed = Date.now() - dragStartTime;
+
+  // ── CLEAN TAP: no movement AND press was short ──
+  // This is the ONLY path that opens the modal.
+  if (pendingCardId !== null && !dragHasMoved && elapsed < TAP_MAX_MS) {
+    const id = pendingCardId;
+    pendingCardId = null;
+    draggingCard  = null;
+    dragHasMoved  = false;
+    openModal(id);
+    return;
+  }
+
+  // ── EVERYTHING ELSE: just drop card where it is, never open modal ──
+  pendingCardId = null;
+
+  if (!draggingCard) {
+    dragHasMoved = false;
+    return;
+  }
+
+  const el = draggingCard.el;
+  el.classList.remove('dragging');
+  el.classList.add('dropping');
+
+  const card = tableCards.find(c => c.id === draggingCard.id);
+  if (card) {
+    const settleRot = (Math.random() - 0.5) * 10;
+    card.rot = settleRot;
+    el.style.transform = `rotate(${settleRot}deg)`;
+  }
+
+  setTimeout(() => el.classList.remove('dropping'), 400);
+  draggingCard = null;
+  dragHasMoved = false;
+}
+
+function getPos(e) {
+  if (e.touches && e.touches[0]) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  if (e.changedTouches && e.changedTouches[0]) return { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY };
+  return { x: e.clientX, y: e.clientY };
+}
+
+// ── ARRANGE FUNCTIONS ─────────────────────────────────────────────────────────
+const NEIGHBOURHOOD_COORDS = {
+  'Westboro':      { x: 0.15, y: 0.35 },
+  'Kanata':        { x: 0.08, y: 0.5  },
+  'Findlay Creek': { x: 0.75, y: 0.72 },
+  'Hunt Club':     { x: 0.6,  y: 0.65 },
+  'Stittsville':   { x: 0.05, y: 0.6  },
+  'Barrhaven':     { x: 0.35, y: 0.75 },
+  'Orleans':       { x: 0.85, y: 0.45 },
+  'Manotick':      { x: 0.55, y: 0.82 },
+  'Glebe':         { x: 0.45, y: 0.42 },
+  'Nepean':        { x: 0.3,  y: 0.58 },
+  'Your Location': { x: 0.48, y: 0.48 },
+};
+
+const CATEGORY_ZONES = {
+  'kids':    { col: 0, row: 0 },
+  'tech':    { col: 1, row: 0 },
+  'bedroom': { col: 2, row: 0 },
+  'kitchen': { col: 3, row: 0 },
+  'outdoors':{ col: 0, row: 1 },
+  'summer':  { col: 1, row: 1 },
+  'clothes': { col: 2, row: 1 },
+  'sports':  { col: 3, row: 1 },
+};
+
+function animateArrange(positions) {
+  const surface = document.getElementById('tableSurface');
+  const W = surface.offsetWidth  || window.innerWidth;
+  const H = surface.offsetHeight || window.innerHeight;
+
+  tableCards.forEach(card => {
+    const pos = positions[card.id];
+    if (!pos) return;
+    card.x   = pos.x;
+    card.y   = pos.y;
+    card.rot = pos.rot || 0;
+
+    const el = document.getElementById('tc_' + card.id);
+    if (!el || el.style.display === 'none') return;
+    el.classList.add('arranging');
+    el.style.left      = card.x + 'px';
+    el.style.top       = card.y + 'px';
+    el.style.transform = `rotate(${card.rot}deg)`;
+    setTimeout(() => el.classList.remove('arranging'), 600);
+  });
+}
+
+function arrangeByCategory() {
+  const surface = document.getElementById('tableSurface');
+  const W = surface.offsetWidth  || window.innerWidth;
+  const H = (surface.offsetHeight || window.innerHeight) - 160;
+  const COLS = 4, ROWS = 2;
+  const zoneW = W / COLS;
+  const zoneH = H / ROWS;
+  const CARD_W = 150, CARD_H = 220;
+
+  // remove old pile buttons
+  surface.querySelectorAll('.pile-stack-btn').forEach(b => b.remove());
+
+  // group by category
+  const groups = {};
+  tableCards.forEach(card => {
+    const cat = card.category || 'outdoors';
+    if (!groups[cat]) groups[cat] = [];
+    groups[cat].push(card);
+  });
+
+  const positions = {};
+  const pileButtonData = []; // collect pile centres for button injection
+
+  Object.entries(groups).forEach(([cat, cards]) => {
+    const zone = CATEGORY_ZONES[cat] || { col: 0, row: 0 };
+    const cx = zone.col * zoneW + zoneW / 2;
+    const cy = zone.row * zoneH + zoneH / 2 + 90;
+
+    cards.forEach((card, i) => {
+      const stackOff = Math.min(i, 6);
+      positions[card.id] = {
+        x:   cx - CARD_W/2 + stackOff * 5,
+        y:   cy - CARD_H/2 + stackOff * 4,
+        rot: (Math.random() - 0.5) * 12,
+      };
+    });
+
+    // store pile button info
+    const topCard = cards[cards.length - 1];
+    const item    = ITEMS.find(i => i.id === topCard.id);
+    pileButtonData.push({
+      cat,
+      catLabel: item ? item.catLabel : cat,
+      count: cards.length,
+      bx: cx,  // button x centre
+      by: cy - CARD_H/2 - 18, // just above the pile
+    });
+  });
+
+  animateArrange(positions);
+
+  // inject pile buttons after animation settles
+  setTimeout(() => {
+    pileButtonData.forEach(pb => {
+      const btn = document.createElement('button');
+      btn.className = 'pile-stack-btn';
+      btn.style.left = pb.bx + 'px';
+      btn.style.top  = pb.by + 'px';
+      btn.innerHTML  = `🃏 Check this pile <span class="psb-count">${pb.count}</span> ${pb.catLabel.toUpperCase()}`;
+      btn.addEventListener('mousedown', e => e.stopPropagation());
+      btn.addEventListener('touchstart', e => e.stopPropagation());
+      btn.onclick = (e) => { e.stopPropagation(); openPileViewer(pb.cat); };
+      surface.appendChild(btn);
+    });
+  }, 620);
+
+  showToast('📂 Stacked by category — tap a pile to check it');
+}
+
+function arrangeByDistance() {
+  const surface  = document.getElementById('tableSurface');
+  const W = surface.offsetWidth  || window.innerWidth;
+  const H = (surface.offsetHeight || window.innerHeight) - 160;
+  const CARD_W = 150, CARD_H = 220;
+
+  // remove old pile buttons
+  surface.querySelectorAll('.pile-stack-btn').forEach(b => b.remove());
+
+  const groups = {};
+  tableCards.forEach(card => {
+    const hood = card.location || 'Westboro';
+    if (!groups[hood]) groups[hood] = [];
+    groups[hood].push(card);
+  });
+
+  const positions = {};
+  const pileButtonData = [];
+
+  Object.entries(groups).forEach(([hood, cards]) => {
+    const coords = NEIGHBOURHOOD_COORDS[hood] || { x: 0.5, y: 0.5 };
+    const cx = Math.max(CARD_W/2 + 10, Math.min(W - CARD_W/2 - 10, coords.x * W));
+    const cy = Math.max(CARD_H/2 + 90, Math.min(H - CARD_H/2 + 80, coords.y * H));
+
+    cards.forEach((card, i) => {
+      const angle  = (i / Math.max(cards.length, 1)) * Math.PI * 2;
+      const spread = cards.length > 1 ? Math.min(30, 10 * cards.length) : 0;
+      positions[card.id] = {
+        x:   cx - CARD_W/2 + Math.cos(angle) * spread * (i === 0 ? 0 : 1),
+        y:   cy - CARD_H/2 + Math.sin(angle) * spread * (i === 0 ? 0 : 1),
+        rot: (Math.random() - 0.5) * 18,
+      };
+    });
+
+    pileButtonData.push({ hood, count: cards.length, bx: cx, by: cy - CARD_H/2 - 18 });
+  });
+
+  animateArrange(positions);
+
+  setTimeout(() => {
+    pileButtonData.forEach(pb => {
+      const btn = document.createElement('button');
+      btn.className = 'pile-stack-btn';
+      btn.style.left = pb.bx + 'px';
+      btn.style.top  = pb.by + 'px';
+      btn.innerHTML  = `🃏 Check pile <span class="psb-count">${pb.count}</span> ${pb.hood.toUpperCase()}`;
+      btn.addEventListener('mousedown', e => e.stopPropagation());
+      btn.addEventListener('touchstart', e => e.stopPropagation());
+      // for distance piles, filter by location
+      btn.onclick = (e) => { e.stopPropagation(); openPileViewerByLocation(pb.hood); };
+      surface.appendChild(btn);
+    });
+  }, 620);
+
+  showToast('📍 Stacked by neighbourhood');
+}
+
+function arrangeScatter() {
+  const surface = document.getElementById('tableSurface');
+  const W = surface.offsetWidth  || window.innerWidth;
+  const H = (surface.offsetHeight || window.innerHeight) - 120;
+
+  // remove pile buttons
+  surface.querySelectorAll('.pile-stack-btn').forEach(b => b.remove());
+
+  const positions = {};
+  tableCards.forEach(card => {
+    positions[card.id] = {
+      x:   20 + Math.random() * (W - 180),
+      y:   90 + Math.random() * (H - 260),
+      rot: (Math.random() - 0.5) * 22,
+    };
+  });
+
+  animateArrange(positions);
+  showToast('🎲 Scattered!');
+}
+
+// ── INTEREST ─────────────────────────────────────────────────────────────────
+function quickInterestDirect(e, id) {
+  e.stopPropagation();
+  e.preventDefault();
+  const item = ITEMS.find(i => i.id === id);
+  if (!item) return;
+
+  if (item.interested) {
+    item.interested = false;
+    item.interest   = Math.max(0, item.interest - 1);
+    showToast('Removed interest');
+  } else {
+    item.interested = true;
+    item.interest++;
+    showToast('❤️ Seller notified!');
+  }
+
+  // update badge in DOM without full re-render
+  const badge = document.getElementById('ibadge_' + id);
+  if (badge) {
+    badge.textContent    = item.interest;
+    badge.style.display  = item.interest > 0 ? 'inline' : 'none';
+  }
+}
+
+function toggleInterestModal() {
+  const item = ITEMS.find(i => i.id === modalItemId);
+  if (!item) return;
+
+  const btn  = document.getElementById('interestBigBtn');
+  const text = document.getElementById('interestBtnText');
+
+  if (item.interested) {
+    item.interested = false;
+    item.interest = Math.max(0, item.interest - 1);
+    btn.classList.remove('interested');
+    text.textContent = "I'm Interested";
+    showToast('Removed interest');
+  } else {
+    item.interested = true;
+    item.interest++;
+    btn.classList.add('interested');
+    text.textContent = "✓ Interested — Seller Notified!";
+    showToast('🔔 Seller will be notified to add details!');
+  }
+
+  document.getElementById('modalInterest').textContent = item.interest;
+}
+
+// ── MODAL ─────────────────────────────────────────────────────────────────────
+function openModal(id) {
+  const item = ITEMS.find(i => i.id === id);
+  if (!item) return;
+  modalItemId = id;
+
+  document.getElementById('modalPhoto').innerHTML = `<div style="font-size:80px;width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:${item.color}">${item.emoji}</div>`;
+  document.getElementById('modalCat').textContent = item.catLabel;
+  document.getElementById('modalTitle').textContent = item.title;
+  document.getElementById('modalLocation').textContent = item.location;
+  document.getElementById('modalTime').textContent = item.time;
+  document.getElementById('modalInterest').textContent = item.interest;
+  document.getElementById('modalNote').textContent = item.note;
+  document.getElementById('modalTags').innerHTML = item.tags.map(t => `<span class="modal-tag">${t}</span>`).join('');
+
+  const btn  = document.getElementById('interestBigBtn');
+  const text = document.getElementById('interestBtnText');
+  btn.className = 'interest-big-btn' + (item.interested ? ' interested' : '');
+  text.textContent = item.interested ? '✓ Interested — Seller Notified!' : "I'm Interested";
+
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modalOverlay')) {
+    document.getElementById('modalOverlay').classList.remove('show');
+    modalItemId = null;
+  }
+}
+
+// ── SNAP DEMO ─────────────────────────────────────────────────────────────────
+function doSnap() {
+  const overlay = document.getElementById('mlOverlay');
+  const status  = document.getElementById('mlStatus');
+  const tagEl   = document.getElementById('mlTagReveal');
+  const demo    = SNAP_DEMOS[snapDemoIdx % SNAP_DEMOS.length];
+  snapDemoIdx++;
+
+  // show overlay
+  overlay.classList.add('show');
+  tagEl.style.display = 'none';
+  status.textContent = 'Analysing photo...';
+
+  setTimeout(() => {
+    status.textContent = 'Detecting object...';
+  }, 500);
+
+  setTimeout(() => {
+    status.textContent = 'Matching category...';
+  }, 1000);
+
+  setTimeout(() => {
+    status.textContent = `Found: ${demo.category}`;
+    tagEl.style.display = 'block';
+    tagEl.textContent = `📂 ${demo.category} · ${demo.tags.slice(0,2).join(' · ')}`;
+    tagEl.style.animation = 'none';
+    tagEl.offsetHeight;
+    tagEl.style.animation = 'popIn 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards';
+  }, 1500);
+
+  setTimeout(() => {
+    overlay.classList.remove('show');
+
+    // add to queue
+    const queueEl = document.getElementById('snapQueue');
+    const thumb = document.createElement('div');
+    thumb.className = 'snap-thumb';
+    thumb.innerHTML = `${demo.emoji}<div class="ml-tag">${demo.category}</div>`;
+    queueEl.appendChild(thumb);
+    queueEl.scrollLeft = queueEl.scrollWidth;
+
+    // also add to items
+    const newItem = {
+      id: ITEMS.length + 100 + snapDemoIdx,
+      emoji: demo.emoji,
+      category: 'tech',
+      catLabel: demo.category,
+      title: `${demo.category} — Auto Tagged`,
+      location: 'Your Location',
+      time: 'just now',
+      interest: 0,
+      interested: false,
+      note: 'No details yet. Tap interested to notify the seller.',
+      tags: demo.tags,
+      color: '#f0ebe0'
+    };
+    ITEMS.unshift(newItem);
+
+    showToast(`✓ Dropped on the table as "${demo.category}"`);
+  }, 2400);
+}
+
+// ── PILE FOCUS MODE — pushes other piles off screen, spreads focused pile ─────
+let pileMode       = false;
+let pileFocusCat   = null;
+let pileCardIds    = [];
+let pileFlickStart = null;
+let pileFlickCardId = null;
+
+// positions before pile focus so we can restore
+const savedPositions = {};
+
+const FLICK_DIST = 70;
+
+function _doPileOpen(cardIds, label, count) {
+  if (pileMode) return;
+  pileMode    = true;
+  pileCardIds = cardIds;
+
+  const surface = document.getElementById('tableSurface');
+  const W = surface.offsetWidth  || window.innerWidth;
+  const H = surface.offsetHeight || window.innerHeight;
+
+  // save all positions for restore
+  tableCards.forEach(c => {
+    savedPositions[c.id] = { x: c.x, y: c.y, rot: c.rot };
+  });
+
+  // hide pile buttons
+  surface.querySelectorAll('.pile-stack-btn').forEach(b => b.style.display = 'none');
+
+  // group outside cards by category — each group flies off in one direction
+  const outsideGroups = {};
+  tableCards.filter(c => !pileCardIds.includes(c.id)).forEach(c => {
+    const key = c.category || 'misc';
+    if (!outsideGroups[key]) outsideGroups[key] = [];
+    outsideGroups[key].push(c);
+  });
+
+  const dirs = ['left','right','bottom','left','right','bottom','top','left'];
+  const groupKeys = Object.keys(outsideGroups);
+
+  groupKeys.forEach((key, gi) => {
+    const dir = dirs[gi % dirs.length];
+    outsideGroups[key].forEach((c, ci) => {
+      const el = document.getElementById('tc_' + c.id);
+      if (!el) return;
+      el.classList.add('pile-out');
+      el.style.pointerEvents = 'none';
+
+      // force a reflow so the element registers its current position,
+      // then add arranging + move so the transition fires
+      el.getBoundingClientRect();
+
+      setTimeout(() => {
+        el.classList.add('arranging');
+        const jitter = (Math.random() - 0.5) * 60;
+        if (dir === 'left')   { el.style.left = (-240 + jitter) + 'px'; }
+        if (dir === 'right')  { el.style.left = (W + 100 + jitter) + 'px'; }
+        if (dir === 'bottom') { el.style.top  = (H + 100 + jitter) + 'px'; }
+        if (dir === 'top')    { el.style.top  = '-260px'; }
+        el.style.transform = `rotate(${(Math.random()-0.5)*40}deg)`;
+        el.style.opacity   = '0';
+        setTimeout(() => {
+          el.classList.remove('arranging');
+          el.style.display = 'none';       // fully gone once animation ends
+        }, 560);
+      }, ci * 20);
+    });
+  });
+
+  // spread focused pile cards across the now-clear table
+  setTimeout(() => {
+    const pCards = tableCards.filter(c => pileCardIds.includes(c.id));
+    const n    = pCards.length;
+    const cols = n <= 2 ? n : n <= 6 ? 3 : 4;
+    const rows = Math.ceil(n / cols);
+    const padL = 24, padT = 96, padR = 24, padB = 160;
+    const cellW = (W - padL - padR  - 140) / Math.max(cols - 1, 1);
+    const cellH = (H - padT - padB  - 200) / Math.max(rows - 1, 1);
+
+    pCards.forEach((card, i) => {
+      const col = i % cols;
+      const row = Math.floor(i / cols);
+      const tx  = padL + col * cellW + (Math.random() - 0.5) * 22;
+      const ty  = padT + row * (rows > 1 ? cellH : 0) + (Math.random() - 0.5) * 18;
+      const rot = (Math.random() - 0.5) * 12;
+
+      card.x = tx; card.y = ty; card.rot = rot;
+      const el = document.getElementById('tc_' + card.id);
+      if (!el) return;
+      el.style.display = '';
+      el.style.opacity = '1';
+      el.classList.add('pile-in');
+      el.classList.add('arranging');
+      el.style.left      = tx + 'px';
+      el.style.top       = ty + 'px';
+      el.style.transform = `rotate(${rot}deg)`;
+      el.style.pointerEvents = '';
+      setTimeout(() => el.classList.remove('arranging'), 600);
+    });
+  }, 300);
+
+  // show UI chrome
+  document.getElementById('pfbLabel').textContent = label.toUpperCase();
+  document.getElementById('pfbCount').textContent = count + ' items — drag or flick to act';
+  document.getElementById('pileFocusBar').classList.add('show');
+  document.getElementById('pileIntentBar').classList.add('show');
+  document.getElementById('tableCatBar').style.display = 'none';
+}
+
+function openPileViewer(cat) {
+  pileFocusCat = cat;
+  const cardIds = tableCards.filter(c => cat === 'all' || c.category === cat).map(c => c.id);
+  if (!cardIds.length) { showToast('Empty pile!'); return; }
+  const sample = ITEMS.find(i => i.id === cardIds[0]);
+  const label  = sample ? sample.catLabel : cat;
+  _doPileOpen(cardIds, label, cardIds.length);
+  bindPileDragOverride();
+}
+
+function openPileViewerByLocation(hood) {
+  pileFocusCat = 'loc:' + hood;
+  const cardIds = tableCards.filter(c => c.location === hood).map(c => c.id);
+  if (!cardIds.length) { showToast('Empty pile!'); return; }
+  _doPileOpen(cardIds, hood, cardIds.length);
+  bindPileDragOverride();
+}
+
+function closePileViewer() {
+  if (!pileMode) return;
+  pileMode = false;
+
+  const surface = document.getElementById('tableSurface');
+
+  // fly all cards back to saved positions
+  tableCards.forEach(c => {
+    const el  = document.getElementById('tc_' + c.id);
+    const pos = savedPositions[c.id];
+    if (!el || !pos) return;
+
+    // make sure hidden cards are visible again before animating back
+    el.style.display     = 'block';
+    el.style.opacity     = '0';
+    el.style.pointerEvents = '';
+    el.classList.remove('pile-in', 'pile-out');
+
+    // force reflow so opacity:0 registers, then transition in
+    el.getBoundingClientRect();
+
+    el.classList.add('arranging');
+    el.style.left      = pos.x + 'px';
+    el.style.top       = pos.y + 'px';
+    el.style.transform = `rotate(${pos.rot}deg)`;
+    el.style.opacity   = '1';
+    c.x = pos.x; c.y = pos.y; c.rot = pos.rot;
+
+    setTimeout(() => el.classList.remove('arranging'), 600);
+  });
+
+  // restore pile buttons after animation
+  setTimeout(() => {
+    surface.querySelectorAll('.pile-stack-btn').forEach(b => b.style.display = '');
+  }, 640);
+
+  document.getElementById('pileFocusBar').classList.remove('show');
+  document.getElementById('pileIntentBar').classList.remove('show');
+  document.getElementById('tableCatBar').style.display = '';
+
+  ['flickLeft','flickRight','flickUp','flickDown'].forEach(id =>
+    document.getElementById(id).style.opacity = '0');
+
+  unbindPileDragOverride();
+  pileCardIds     = [];
+  pileFlickStart  = null;
+  pileFlickCardId = null;
+}
+
+// ── PILE DRAG OVERRIDE — flick intent layer, no zoom ─────────────────────────
+function bindPileDragOverride() {
+  document.addEventListener('mousedown',  onPileCardDown, true);
+  document.addEventListener('touchstart', onPileCardDown, { capture:true, passive:true });
+  document.addEventListener('mousemove',  onPileCardMove, true);
+  document.addEventListener('mouseup',    onPileCardUp,   true);
+  document.addEventListener('touchmove',  onPileCardMove, { capture:true, passive:false });
+  document.addEventListener('touchend',   onPileCardUp,   true);
+}
+
+function unbindPileDragOverride() {
+  document.removeEventListener('mousedown',  onPileCardDown, true);
+  document.removeEventListener('touchstart', onPileCardDown, true);
+  document.removeEventListener('mousemove',  onPileCardMove, true);
+  document.removeEventListener('mouseup',    onPileCardUp,   true);
+  document.removeEventListener('touchmove',  onPileCardMove, true);
+  document.removeEventListener('touchend',   onPileCardUp,   true);
+}
+
+function onPileCardDown(e) {
+  if (!pileMode) return;
+  const el = e.target.closest('.pile-in');
+  if (!el) return;
+  const id = parseInt(el.id.replace('tc_', ''));
+  if (!pileCardIds.includes(id)) return;
+  pileFlickCardId = id;
+  const pos = getPos(e);
+  pileFlickStart  = { x: pos.x, y: pos.y, t: Date.now() };
+}
+
+function onPileCardMove(e) {
+  if (!pileMode || !pileFlickStart) return;
+  const pos = getPos(e);
+  const dx  = pos.x - pileFlickStart.x;
+  const dy  = pos.y - pileFlickStart.y;
+  const adx = Math.abs(dx), ady = Math.abs(dy);
+  const thr = 24;
+
+  const fL = document.getElementById('flickLeft');
+  const fR = document.getElementById('flickRight');
+  const fU = document.getElementById('flickUp');
+  const fD = document.getElementById('flickDown');
+  const str = v => Math.min(1, (Math.abs(v) - thr) / 55) + '';
+
+  if (adx > ady && adx > thr) {
+    fL.style.opacity = dx < 0 ? str(dx) : '0';
+    fR.style.opacity = dx > 0 ? str(dx) : '0';
+    fU.style.opacity = fD.style.opacity = '0';
+  } else if (ady > thr) {
+    fU.style.opacity = dy < 0 ? str(dy) : '0';
+    fD.style.opacity = dy > 0 ? str(dy) : '0';
+    fL.style.opacity = fR.style.opacity = '0';
+  } else {
+    fL.style.opacity = fR.style.opacity = fU.style.opacity = fD.style.opacity = '0';
+  }
+}
+
+function onPileCardUp(e) {
+  if (!pileMode || !pileFlickStart) return;
+
+  const pos = getPos(e);
+  const dx  = pos.x - pileFlickStart.x;
+  const dy  = pos.y - pileFlickStart.y;
+  const dt  = Date.now() - pileFlickStart.t;
+  const adx = Math.abs(dx), ady = Math.abs(dy);
+
+  ['flickLeft','flickRight','flickUp','flickDown'].forEach(id =>
+    document.getElementById(id).style.opacity = '0');
+
+  if (dt < 550 && (adx > FLICK_DIST || ady > FLICK_DIST)) {
+    if (adx > ady)  { dx < 0 ? commitPileAction('save') : commitPileAction('offer'); }
+    else            { dy < 0 ? commitPileAction('details') : commitPileAction('skip'); }
+  }
+
+  pileFlickStart  = null;
+  pileFlickCardId = null;
+}
+
+function commitPileAction(action) {
+  const msgs = {
+    save:    '🔖 Saved for later',
+    offer:   '💸 Offer sent — seller notified!',
+    details: '💬 Asking seller for more details',
+    skip:    '⏭ Skipped',
+  };
+  showToast(msgs[action] || action);
+}
+
+function swipeCard(action) { commitPileAction(action); }
+
+
+
+
+
+
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+renderGrid(ITEMS);
+</script>
+</body>
+</html>
