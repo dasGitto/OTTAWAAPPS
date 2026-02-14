@@ -365,6 +365,242 @@
             color: var(--felt);
         }
 
+        /* ── CARD DETAIL MODAL (Full Screen) ── */
+        .detail-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            background: var(--surface);
+            display: none;
+            flex-direction: column;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        .detail-modal.show {
+            display: flex;
+        }
+
+        .detail-header {
+            position: sticky;
+            top: 0;
+            background: var(--surface);
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 10;
+        }
+
+        .close-detail {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--tag-bg);
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .detail-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--ink);
+            flex: 1;
+        }
+
+        .detail-image {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            background: var(--tag-bg);
+        }
+
+        .detail-content {
+            padding: 24px;
+        }
+
+        .detail-category {
+            display: inline-block;
+            background: var(--accent);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .detail-price {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--ink);
+            margin-bottom: 16px;
+        }
+
+        .detail-price small {
+            font-size: 14px;
+            font-weight: 400;
+            color: var(--ink-soft);
+        }
+
+        .detail-meta {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            padding: 15px 0;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .meta-label {
+            font-size: 11px;
+            color: var(--ink-soft);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .meta-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--ink);
+        }
+
+        .detail-description {
+            background: var(--tag-bg);
+            padding: 20px;
+            border-radius: 16px;
+            margin: 20px 0;
+            line-height: 1.6;
+            color: var(--ink);
+        }
+
+        .detail-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .detail-tag {
+            background: var(--tag-bg);
+            color: var(--ink-soft);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+        }
+
+        /* Action Buttons Grid */
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin: 30px 0;
+        }
+
+        .action-btn {
+            padding: 18px 12px;
+            border: none;
+            border-radius: 16px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            background: var(--surface);
+            border: 2px solid var(--border);
+        }
+
+        .action-btn:active {
+            transform: scale(0.96);
+        }
+
+        .action-btn .emoji {
+            font-size: 28px;
+        }
+
+        .action-btn.offer {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .action-btn.save {
+            background: var(--felt);
+            color: white;
+            border-color: var(--felt);
+        }
+
+        .action-btn.ask {
+            background: var(--ink);
+            color: white;
+            border-color: var(--ink);
+        }
+
+        .action-btn.report {
+            background: white;
+            color: #dc2626;
+            border-color: #dc2626;
+        }
+
+        .action-btn.report .emoji {
+            color: #dc2626;
+        }
+
+        .seller-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 20px;
+            background: var(--tag-bg);
+            border-radius: 16px;
+            margin: 20px 0;
+        }
+
+        .seller-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+        }
+
+        .seller-details {
+            flex: 1;
+        }
+
+        .seller-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .seller-rating {
+            color: #fbbf24;
+            font-size: 14px;
+        }
+
         /* Bottom Nav */
         .bottom-nav {
             position: fixed;
@@ -409,13 +645,16 @@
             transform: translateX(-50%);
             background: var(--ink);
             color: white;
-            padding: 10px 20px;
+            padding: 12px 24px;
             border-radius: 100px;
-            font-size: 13px;
-            z-index: 999;
+            font-size: 14px;
+            font-weight: 500;
+            z-index: 2000;
             opacity: 0;
             transition: opacity 0.3s;
             pointer-events: none;
+            white-space: nowrap;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
         }
 
         .toast.show { opacity: 1; }
@@ -483,7 +722,7 @@
             <button class="back-btn" onclick="goTo('home')">←</button>
             <div>
                 <div class="table-title">The Table</div>
-                <div class="table-subtitle">All items for sale</div>
+                <div class="table-subtitle">Tap any card for details</div>
             </div>
         </div>
 
@@ -497,6 +736,74 @@
             <div class="table-cat-pill" onclick="filterTable('outdoors')">🌿 Outdoors</div>
             <div class="table-cat-pill" onclick="filterTable('kids')">🧸 Kids</div>
             <div class="table-cat-pill" onclick="filterTable('clothes')">👗 Clothes</div>
+        </div>
+    </div>
+
+    <!-- CARD DETAIL MODAL (Full Screen) -->
+    <div class="detail-modal" id="detailModal">
+        <div class="detail-header">
+            <button class="close-detail" onclick="closeDetail()">✕</button>
+            <div class="detail-title" id="detailTitle">Item Details</div>
+        </div>
+        
+        <img class="detail-image" id="detailImage" src="" alt="Item">
+        
+        <div class="detail-content">
+            <span class="detail-category" id="detailCategory">Category</span>
+            
+            <div class="detail-price" id="detailPrice">
+                $45 <small>or best offer</small>
+            </div>
+            
+            <div class="detail-meta">
+                <div class="meta-item">
+                    <span class="meta-label">Location</span>
+                    <span class="meta-value" id="detailLocation">Ottawa</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Posted</span>
+                    <span class="meta-value" id="detailTime">2h ago</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Views</span>
+                    <span class="meta-value" id="detailViews">234</span>
+                </div>
+            </div>
+            
+            <div class="detail-description" id="detailDescription">
+                Item description goes here...
+            </div>
+            
+            <div class="detail-tags" id="detailTags"></div>
+            
+            <!-- ACTION BUTTONS GRID - Full screen, easy to tap -->
+            <div class="action-grid">
+                <button class="action-btn offer" onclick="handleAction('offer')">
+                    <span class="emoji">💸</span>
+                    Make Offer
+                </button>
+                <button class="action-btn save" onclick="handleAction('save')">
+                    <span class="emoji">🔖</span>
+                    Keep for Later
+                </button>
+                <button class="action-btn ask" onclick="handleAction('ask')">
+                    <span class="emoji">💬</span>
+                    Ask Details
+                </button>
+                <button class="action-btn report" onclick="handleAction('report')">
+                    <span class="emoji">🚩</span>
+                    Report
+                </button>
+            </div>
+            
+            <!-- Seller Info -->
+            <div class="seller-info">
+                <div class="seller-avatar">👤</div>
+                <div class="seller-details">
+                    <div class="seller-name" id="detailSeller">Alex from Ottawa</div>
+                    <div class="seller-rating">★★★★★ (24 reviews)</div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -523,9 +830,54 @@
         // Main items array - this is our "database"
         let marketplaceItems = JSON.parse(localStorage.getItem('marketplaceItems')) || [
             // Default items to start
-            { id: 1, emoji: '🪴', category: 'outdoors', catLabel: 'Outdoors', title: 'Fiddle Leaf Fig', location: 'Westboro', time: '2h ago', interest: 3 },
-            { id: 2, emoji: '📱', category: 'tech', catLabel: 'Tech', title: 'iPad Air', location: 'Barrhaven', time: '30m ago', interest: 18 },
-            { id: 3, emoji: '🍳', category: 'kitchen', catLabel: 'Kitchen', title: 'Le Creuset Pot', location: 'Hunt Club', time: '3h ago', interest: 9 },
+            { 
+                id: 1, 
+                emoji: '🪴', 
+                category: 'outdoors', 
+                catLabel: 'Outdoors', 
+                title: 'Fiddle Leaf Fig', 
+                location: 'Westboro', 
+                time: '2h ago', 
+                interest: 3,
+                price: 35,
+                seller: 'Mike from Westboro',
+                rating: 4.8,
+                views: 156,
+                description: 'Healthy fiddle leaf fig plant, about 4 feet tall. Needs a new home as I am moving. Comes with ceramic pot.',
+                tags: ['plant', 'indoor', 'large', 'green']
+            },
+            { 
+                id: 2, 
+                emoji: '📱', 
+                category: 'tech', 
+                catLabel: 'Tech', 
+                title: 'iPad Air (4th Gen)', 
+                location: 'Barrhaven', 
+                time: '30m ago', 
+                interest: 18,
+                price: 450,
+                seller: 'Sarah from Barrhaven',
+                rating: 5.0,
+                views: 342,
+                description: 'iPad Air 4th generation, 64GB, Space Gray. Includes case and charger. Screen protector applied since day one.',
+                tags: ['apple', 'tablet', 'like new', 'accessories included']
+            },
+            { 
+                id: 3, 
+                emoji: '🍳', 
+                category: 'kitchen', 
+                catLabel: 'Kitchen', 
+                title: 'Le Creuset Dutch Oven', 
+                location: 'Hunt Club', 
+                time: '3h ago', 
+                interest: 9,
+                price: 120,
+                seller: 'James from Hunt Club',
+                rating: 4.9,
+                views: 89,
+                description: 'Le Creuset Dutch oven, flame orange color. 5.5qt, perfect for soups and stews. Barely used, like new condition.',
+                tags: ['cast iron', 'cooking', 'premium', 'orange']
+            },
         ];
 
         let nextId = marketplaceItems.length + 1;
@@ -533,6 +885,8 @@
         let tableCards = [];
         let currentFilter = 'all';
         let pendingAIItem = null;
+        let dragTimeout = null;
+        let isDragging = false;
 
         // =============================================
         // NAVIGATION
@@ -599,7 +953,7 @@
 
         async function analyzeImage(file) {
             try {
-                // Simulate AI analysis (in production, replace with real API)
+                // Simulate AI analysis (replace with real API later)
                 setTimeout(() => {
                     const analysis = simulateAIAnalysis(file);
                     displayResults(analysis);
@@ -701,9 +1055,13 @@
                 category: pendingAIItem.category,
                 catLabel: pendingAIItem.category.charAt(0).toUpperCase() + pendingAIItem.category.slice(1),
                 title: pendingAIItem.tags[0] + ' item',
-                location: 'Ottawa', // Default location
+                location: 'Ottawa',
                 time: 'Just now',
                 interest: 0,
+                price: Math.floor(Math.random() * 100) + 20, // Random price between 20-120
+                seller: 'You',
+                rating: 5.0,
+                views: 1,
                 imageUrl: pendingAIItem.imageUrl,
                 description: pendingAIItem.description,
                 tags: pendingAIItem.tags
@@ -712,7 +1070,7 @@
             // Add to "database"
             marketplaceItems.unshift(newItem);
             
-            // Save to localStorage (persists between sessions)
+            // Save to localStorage
             localStorage.setItem('marketplaceItems', JSON.stringify(marketplaceItems));
             
             // Clear the AI result
@@ -735,7 +1093,7 @@
         }
 
         // =============================================
-        // TABLE VIEW (Original Interface)
+        // TABLE VIEW - WITH SINGLE CLICK DETAIL
         // =============================================
         
         function buildTableCards() {
@@ -771,7 +1129,9 @@
                        z-index:${card.z};
                      "
                      onmousedown="startDrag(event,${card.id})"
-                     ontouchstart="startDrag(event,${card.id})">
+                     onmouseup="handleCardClick(event,${card.id})"
+                     ontouchstart="startDrag(event,${card.id})"
+                     ontouchend="handleCardClick(event,${card.id})">
                     ${card.imageUrl ? 
                         `<img class="card-photo" src="${card.imageUrl}" alt="Item">` : 
                         `<div class="card-photo" style="display:flex;align-items:center;justify-content:center;font-size:42px;">${card.emoji}</div>`
@@ -796,19 +1156,26 @@
         }
 
         // =============================================
-        // DRAG AND DROP (Original functionality)
+        // DRAG AND DROP WITH CLICK DETECTION
         // =============================================
         
         let draggingCard = null;
         let dragOffX = 0, dragOffY = 0;
+        let dragStartTime = 0;
+        let dragStartPos = { x: 0, y: 0 };
+        let clickThreshold = 5; // pixels moved before it's considered a drag
 
         function startDrag(e, id) {
             e.preventDefault();
+            const pos = getPos(e);
+            
+            dragStartTime = Date.now();
+            dragStartPos = { x: pos.x, y: pos.y };
+            
             const el = document.getElementById('tc_' + id);
             if (!el) return;
 
             draggingCard = { id, el };
-            const pos = getPos(e);
             const rect = el.getBoundingClientRect();
             dragOffX = pos.x - rect.left;
             dragOffY = pos.y - rect.top;
@@ -818,17 +1185,24 @@
 
         document.addEventListener('mousemove', (e) => {
             if (!draggingCard) return;
-            e.preventDefault();
-
+            
+            // Check if we've moved enough to consider it a drag
             const pos = getPos(e);
-            const surface = document.getElementById('tableSurface');
-            const rect = surface.getBoundingClientRect();
+            const dx = Math.abs(pos.x - dragStartPos.x);
+            const dy = Math.abs(pos.y - dragStartPos.y);
             
-            const x = pos.x - rect.left - dragOffX;
-            const y = pos.y - rect.top - dragOffY;
-            
-            draggingCard.el.style.left = x + 'px';
-            draggingCard.el.style.top = y + 'px';
+            if (dx > clickThreshold || dy > clickThreshold) {
+                e.preventDefault();
+
+                const surface = document.getElementById('tableSurface');
+                const rect = surface.getBoundingClientRect();
+                
+                const x = pos.x - rect.left - dragOffX;
+                const y = pos.y - rect.top - dragOffY;
+                
+                draggingCard.el.style.left = x + 'px';
+                draggingCard.el.style.top = y + 'px';
+            }
         });
 
         document.addEventListener('mouseup', () => {
@@ -838,9 +1212,90 @@
             }
         });
 
+        function handleCardClick(e, id) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Check if it was a quick tap/click (not a drag)
+            const pos = getPos(e);
+            const dx = Math.abs(pos.x - dragStartPos.x);
+            const dy = Math.abs(pos.y - dragStartPos.y);
+            const timeElapsed = Date.now() - dragStartTime;
+            
+            // If it was quick and not moved much, treat as click
+            if (timeElapsed < 200 && dx < clickThreshold && dy < clickThreshold) {
+                const item = marketplaceItems.find(i => i.id === id);
+                if (item) {
+                    showItemDetail(item);
+                }
+            }
+        }
+
         function getPos(e) {
             if (e.touches) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
             return { x: e.clientX, y: e.clientY };
+        }
+
+        // =============================================
+        // CARD DETAIL MODAL (Full Screen)
+        // =============================================
+        
+        function showItemDetail(item) {
+            // Populate all detail fields
+            document.getElementById('detailTitle').textContent = item.title;
+            document.getElementById('detailImage').src = item.imageUrl || '';
+            document.getElementById('detailCategory').textContent = item.catLabel;
+            document.getElementById('detailPrice').innerHTML = `$${item.price || 45} <small>or best offer</small>`;
+            document.getElementById('detailLocation').textContent = item.location;
+            document.getElementById('detailTime').textContent = item.time;
+            document.getElementById('detailViews').textContent = item.views || Math.floor(Math.random() * 200) + 50;
+            document.getElementById('detailDescription').textContent = item.description || 'No description provided.';
+            document.getElementById('detailSeller').textContent = item.seller || 'Anonymous';
+            
+            // Populate tags
+            const tagContainer = document.getElementById('detailTags');
+            tagContainer.innerHTML = '';
+            (item.tags || ['good condition', 'local pickup']).forEach(tag => {
+                const tagEl = document.createElement('span');
+                tagEl.className = 'detail-tag';
+                tagEl.textContent = tag;
+                tagContainer.appendChild(tagEl);
+            });
+            
+            // Store current item for actions
+            window.currentDetailItem = item;
+            
+            // Show modal
+            document.getElementById('detailModal').classList.add('show');
+        }
+
+        function closeDetail() {
+            document.getElementById('detailModal').classList.remove('show');
+        }
+
+        function handleAction(action) {
+            const item = window.currentDetailItem;
+            if (!item) return;
+            
+            const messages = {
+                'offer': `💸 Offer sent to ${item.seller || 'seller'}!`,
+                'save': '🔖 Saved to your collection',
+                'ask': `💬 Message sent to ${item.seller || 'seller'}`,
+                'report': '🚩 Report submitted. Thank you for keeping our community safe!'
+            };
+            
+            showToast(messages[action]);
+            
+            // Simulate interest increment
+            if (action === 'offer' || action === 'save') {
+                item.interest = (item.interest || 0) + 1;
+                localStorage.setItem('marketplaceItems', JSON.stringify(marketplaceItems));
+            }
+            
+            // Close modal after action (except for report which might need confirmation)
+            if (action !== 'report') {
+                setTimeout(closeDetail, 1000);
+            }
         }
 
         // =============================================
@@ -852,7 +1307,7 @@
             const recent = marketplaceItems.slice(0, 5);
             
             preview.innerHTML = recent.map(item => `
-                <div style="flex-shrink:0; width:80px; text-align:center;">
+                <div style="flex-shrink:0; width:80px; text-align:center; cursor:pointer;" onclick="showItemDetail(${JSON.stringify(item).replace(/"/g, '&quot;')})">
                     <div style="width:80px; height:80px; background:var(--tag-bg); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:32px;">
                         ${item.emoji}
                     </div>
