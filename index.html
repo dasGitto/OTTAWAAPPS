@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>FREEPILE Ottawa · drag · drop · done</title>
+    <title>FREEPILE Ottawa · drag · drop · stack</title>
     <style>
         * {
             margin: 0;
@@ -19,8 +19,8 @@
             background: linear-gradient(135deg, #e62e2e 0%, #8b1e1e 100%);
             min-height: 100vh;
             padding: 16px;
-            padding-bottom: 80px;
-            touch-action: pan-y; /* Allow vertical scrolling, but horizontal drag handled by JS */
+            padding-bottom: 100px;
+            touch-action: pan-y pinch-zoom;
         }
 
         .container {
@@ -395,104 +395,132 @@
             font-size: 0.85em;
         }
 
-        /* Cards Grid - Interactive Drag/Drop Zone */
-        .cards-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
-            min-height: 300px;
-            transition: all 0.2s;
+        /* STACKABLE TABLE - Draggable Cards Container */
+        .cards-table {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin: 20px 0;
+            min-height: 400px;
             padding: 10px;
+            background: rgba(255,255,255,0.1);
             border-radius: 20px;
+            backdrop-filter: blur(5px);
         }
 
-        .cards-grid.drag-over {
-            background: rgba(255,255,255,0.2);
+        .cards-table.drag-over {
+            background: rgba(255,255,255,0.3);
             border: 3px dashed white;
         }
 
-        /* Interactive Card */
-        .card {
+        /* Stackable Card - Draggable */
+        .stack-card {
             background: white;
             border-radius: 16px;
-            overflow: hidden;
+            padding: 16px;
             box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
             transition: all 0.2s;
             border: 2px solid transparent;
             cursor: grab;
-            touch-action: none; /* Let JS handle touch */
+            touch-action: none;
             position: relative;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            width: 100%;
+            transform-origin: center;
         }
 
-        .card.dragging {
-            opacity: 0.8;
+        .stack-card:active {
+            cursor: grabbing;
+        }
+
+        .stack-card.dragging {
+            opacity: 0.9;
             transform: scale(1.02) rotate(1deg);
             box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2);
             cursor: grabbing;
             z-index: 1000;
-            position: relative;
+            position: fixed;
+            width: calc(100% - 40px);
+            max-width: 500px;
+            pointer-events: none;
         }
 
-        .card:active {
-            cursor: grabbing;
-        }
-
-        .card.free {
+        .stack-card.free {
             border-left: 6px solid #22c55e;
         }
 
-        .card.sale {
+        .stack-card.sale {
             border-left: 6px solid #ef4444;
         }
 
-        .card-image {
-            width: 100%;
-            height: 140px;
+        .stack-card .card-image {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
             object-fit: cover;
             background: #f1f5f9;
-            pointer-events: none; /* Prevent image from interfering with drag */
+            pointer-events: none;
         }
 
-        .card-content {
-            padding: 12px;
-            pointer-events: none; /* Prevent text from interfering with drag */
+        .stack-card .card-content {
+            flex: 1;
+            pointer-events: none;
         }
 
-        .card-title {
+        .stack-card .card-title {
             font-weight: 600;
-            font-size: 0.95em;
-            margin-bottom: 6px;
+            font-size: 1.1em;
+            margin-bottom: 4px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-        .card-price {
+        .stack-card .card-price {
             font-weight: 700;
-            font-size: 0.9em;
         }
 
-        .card-price.free {
+        .stack-card .card-price.free {
             color: #22c55e;
         }
 
-        .card-price.sale {
+        .stack-card .card-price.sale {
             color: #ef4444;
         }
 
-        .card-meta {
+        .stack-card .card-meta {
             display: flex;
             justify-content: space-between;
             color: #64748b;
-            font-size: 0.75em;
-            margin-top: 6px;
+            font-size: 0.85em;
         }
 
-        .card-region {
+        .stack-card .card-region {
             background: #f1f5f9;
-            padding: 3px 8px;
+            padding: 2px 8px;
             border-radius: 40px;
+        }
+
+        /* Drag Handle */
+        .drag-handle {
+            width: 30px;
+            height: 30px;
+            background: #e2e8f0;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: #64748b;
+            cursor: grab;
+            touch-action: none;
+        }
+
+        .drag-handle:active {
+            cursor: grabbing;
+            background: #cbd5e1;
         }
 
         /* Action Menu (appears on long press) */
@@ -505,7 +533,6 @@
             background: rgba(0,0,0,0.8);
             backdrop-filter: blur(5px);
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
             gap: 10px;
@@ -516,7 +543,7 @@
             z-index: 5;
         }
 
-        .card.actions-visible .card-actions {
+        .stack-card.actions-visible .card-actions {
             opacity: 1;
             pointer-events: all;
         }
@@ -524,17 +551,14 @@
         .action-menu-btn {
             background: white;
             border: none;
-            padding: 12px 20px;
+            padding: 10px 15px;
             border-radius: 30px;
             font-weight: 600;
-            font-size: 1em;
-            width: 80%;
-            max-width: 200px;
+            font-size: 0.9em;
             cursor: pointer;
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 8px;
+            gap: 5px;
             transition: transform 0.2s;
         }
 
@@ -559,7 +583,8 @@
 
         /* Drop Zones */
         .drop-zones {
-            display: flex;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
             gap: 10px;
             margin: 20px 0;
             position: sticky;
@@ -568,9 +593,8 @@
         }
 
         .drop-zone {
-            flex: 1;
-            padding: 20px;
-            border-radius: 30px;
+            padding: 15px;
+            border-radius: 20px;
             background: rgba(255,255,255,0.9);
             backdrop-filter: blur(10px);
             border: 3px dashed #94a3b8;
@@ -578,6 +602,7 @@
             font-weight: 600;
             transition: all 0.2s;
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            font-size: 0.9em;
         }
 
         .drop-zone.drag-over {
@@ -625,10 +650,11 @@
         .empty-state {
             text-align: center;
             padding: 40px 20px;
-            color: #94a3b8;
+            color: white;
             grid-column: 1 / -1;
-            background: rgba(255,255,255,0.9);
+            background: rgba(255,255,255,0.1);
             border-radius: 16px;
+            font-size: 1.1em;
         }
 
         .toast {
@@ -770,8 +796,8 @@
             </div>
         </div>
 
-        <!-- Cards Grid - Drag Source -->
-        <div class="cards-grid" id="cardsGrid"></div>
+        <!-- STACKABLE TABLE - Draggable Cards Container -->
+        <div class="cards-table" id="cardsTable"></div>
     </div>
 
     <div class="toast" id="toast"></div>
@@ -791,9 +817,11 @@
         
         // Drag state
         let draggedCard = null;
+        let draggedCardIndex = -1;
         let dragOffsetX = 0;
         let dragOffsetY = 0;
-        let initialTouch = null;
+        let initialY = 0;
+        let cardHeight = 0;
 
         // ==================== INIT ====================
         if (!deviceId) {
@@ -808,7 +836,7 @@
 
         updateRegionDisplay();
         updateCounts();
-        renderGrid();
+        renderTable();
         initDragAndDrop();
 
         // ==================== HANDLE ====================
@@ -967,17 +995,30 @@
 
         function mapToCategory(label) {
             label = label.toLowerCase();
-            for (const [key, value] of Object.entries({
-                'food':'kitchen', 'furniture':'bedroom', 'bed':'bedroom', 'sofa':'bedroom',
-                'laptop':'tech', 'phone':'tech', 'toy':'kids', 'shirt':'clothes', 'ball':'sports'
-            })) if (label.includes(key)) return value;
+            const map = {
+                'food':'kitchen', 'cook':'kitchen',
+                'furniture':'bedroom', 'bed':'bedroom', 'sofa':'bedroom',
+                'laptop':'tech', 'phone':'tech', 'computer':'tech',
+                'toy':'kids', 'baby':'kids',
+                'shirt':'clothes', 'pants':'clothes', 'dress':'clothes',
+                'ball':'sports', 'sport':'sports'
+            };
+            for (const [key, value] of Object.entries(map)) {
+                if (label.includes(key)) return value;
+            }
             return 'tech';
         }
 
         function formatCategory(cat) {
-            const map = {'kitchen':'🍳 Kitchen','tech':'📱 Tech','bedroom':'🛏️ Bedroom',
-                        'outdoors':'🌿 Outdoors','kids':'🧸 Kids','clothes':'👗 Clothes',
-                        'sports':'⚽ Sports'};
+            const map = {
+                'kitchen':'🍳 Kitchen',
+                'tech':'📱 Tech',
+                'bedroom':'🛏️ Bedroom',
+                'outdoors':'🌿 Outdoors',
+                'kids':'🧸 Kids',
+                'clothes':'👗 Clothes',
+                'sports':'⚽ Sports'
+            };
             return map[cat] || '📦 ' + cat;
         }
 
@@ -999,10 +1040,14 @@
 
             const listing = {
                 id: 'card_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
-                handle: currentHandle, type, price, region: HOME_REGION,
+                handle: currentHandle,
+                type,
+                price,
+                region: HOME_REGION,
                 title: document.getElementById('categoryDisplay').textContent,
                 description: document.getElementById('editableDescription').value,
-                tags: currentAnalyzedItem.tags, image: currentAnalyzedItem.imageUrl,
+                tags: currentAnalyzedItem.tags,
+                image: currentAnalyzedItem.imageUrl,
                 timestamp: Date.now()
             };
 
@@ -1014,18 +1059,18 @@
             currentAnalyzedItem = null;
             
             updateCounts();
-            renderGrid();
+            renderTable();
             showToast(`Added to ${type} pile`);
         }
 
-        // ==================== DRAG AND DROP ====================
+        // ==================== DRAG AND DROP FOR STACKABLE TABLE ====================
         function initDragAndDrop() {
-            const grid = document.getElementById('cardsGrid');
+            const table = document.getElementById('cardsTable');
             const dropZones = document.querySelectorAll('.drop-zone');
             
-            // Touch and mouse drag start
-            grid.addEventListener('touchstart', handleDragStart, { passive: false });
-            grid.addEventListener('mousedown', handleDragStart);
+            // Use event delegation for drag handles
+            table.addEventListener('touchstart', handleDragStart, { passive: false });
+            table.addEventListener('mousedown', handleDragStart);
             
             // Global move and end handlers
             document.addEventListener('touchmove', handleDragMove, { passive: false });
@@ -1035,38 +1080,38 @@
             
             // Drop zone highlighting
             dropZones.forEach(zone => {
-                zone.addEventListener('dragenter', (e) => e.preventDefault());
-                zone.addEventListener('dragover', (e) => {
-                    e.preventDefault();
-                    if (draggedCard) zone.classList.add('drag-over');
-                });
-                zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
-                zone.addEventListener('drop', handleDrop);
-                
-                // Touch drop simulation
-                zone.addEventListener('touchend', (e) => {
-                    if (draggedCard && isEventOverElement(e, zone)) {
-                        handleDrop({ target: zone, dataTransfer: { getData: () => draggedCard.id } });
-                    }
-                });
+                zone.addEventListener('touchmove', (e) => e.preventDefault());
+                zone.addEventListener('dragover', (e) => e.preventDefault());
             });
         }
 
         function handleDragStart(e) {
-            const card = e.target.closest('.card');
+            // Check if drag started from handle or card
+            const handle = e.target.closest('.drag-handle');
+            const card = e.target.closest('.stack-card');
+            
             if (!card) return;
+            
+            // Only allow drag from handle or card itself
+            if (!handle && !card.classList.contains('stack-card')) return;
             
             e.preventDefault();
             
-            // Store card reference
+            // Get card and its index
             draggedCard = card;
-            draggedCard.classList.add('dragging');
+            const cards = [...document.querySelectorAll('.stack-card')];
+            draggedCardIndex = cards.indexOf(card);
+            cardHeight = card.offsetHeight;
             
-            // Store touch/click offset
+            // Store touch/click position
             const touch = e.touches ? e.touches[0] : e;
             const rect = card.getBoundingClientRect();
             dragOffsetX = touch.clientX - rect.left;
             dragOffsetY = touch.clientY - rect.top;
+            initialY = touch.clientY;
+            
+            // Add dragging class
+            card.classList.add('dragging');
             
             // Position absolutely for dragging
             card.style.position = 'fixed';
@@ -1074,6 +1119,9 @@
             card.style.left = touch.clientX - dragOffsetX + 'px';
             card.style.top = touch.clientY - dragOffsetY + 'px';
             card.style.zIndex = '1000';
+            
+            // Highlight table as drop target
+            document.getElementById('cardsTable').classList.add('drag-over');
         }
 
         function handleDragMove(e) {
@@ -1084,13 +1132,48 @@
             const touch = e.touches ? e.touches[0] : e;
             if (!touch) return;
             
-            // Move card
+            // Move dragged card
             draggedCard.style.left = (touch.clientX - dragOffsetX) + 'px';
             draggedCard.style.top = (touch.clientY - dragOffsetY) + 'px';
             
+            // Calculate vertical movement for reordering
+            const deltaY = touch.clientY - initialY;
+            const moveThreshold = cardHeight / 2;
+            
+            if (Math.abs(deltaY) > moveThreshold) {
+                const cards = [...document.querySelectorAll('.stack-card')].filter(c => c !== draggedCard);
+                const direction = deltaY > 0 ? 1 : -1;
+                const newIndex = Math.min(Math.max(draggedCardIndex + direction, 0), cards.length);
+                
+                if (newIndex !== draggedCardIndex) {
+                    // Reorder in array
+                    const filteredListings = listings.filter(l => l.region === currentRegion && l.type === currentPile);
+                    const [movedItem] = filteredListings.splice(draggedCardIndex, 1);
+                    filteredListings.splice(newIndex, 0, movedItem);
+                    
+                    // Update main listings array
+                    const otherListings = listings.filter(l => !(l.region === currentRegion && l.type === currentPile));
+                    listings = [...otherListings, ...filteredListings];
+                    
+                    localStorage.setItem('freepile_listings', JSON.stringify(listings));
+                    
+                    // Re-render without rebuilding DOM (for smoothness)
+                    const table = document.getElementById('cardsTable');
+                    const newCards = filteredListings.map(createCardElement);
+                    table.innerHTML = '';
+                    newCards.forEach(c => table.appendChild(c));
+                    
+                    // Update indices
+                    draggedCardIndex = newIndex;
+                    initialY = touch.clientY;
+                }
+            }
+            
             // Highlight drop zones
             document.querySelectorAll('.drop-zone').forEach(zone => {
-                if (isEventOverElement(e, zone)) {
+                const rect = zone.getBoundingClientRect();
+                if (touch.clientX >= rect.left && touch.clientX <= rect.right &&
+                    touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
                     zone.classList.add('drag-over');
                 } else {
                     zone.classList.remove('drag-over');
@@ -1103,17 +1186,18 @@
             
             e.preventDefault();
             
+            const touch = e.changedTouches ? e.changedTouches[0] : e;
+            
             // Check if dropped on a zone
             let droppedOnZone = null;
             document.querySelectorAll('.drop-zone').forEach(zone => {
-                if (isEventOverElement(e, zone)) {
+                if (touch && zone.matches(':hover') || isEventOverElement(e, zone)) {
                     droppedOnZone = zone;
                 }
                 zone.classList.remove('drag-over');
             });
             
             if (droppedOnZone) {
-                // Get card data
                 const cardId = draggedCard.id;
                 const listing = listings.find(l => l.id === cardId);
                 
@@ -1151,7 +1235,7 @@
                     
                     if (action === 'free' || action === 'sale') {
                         localStorage.setItem('freepile_listings', JSON.stringify(listings));
-                        renderGrid();
+                        renderTable();
                     }
                 }
             }
@@ -1163,13 +1247,12 @@
             draggedCard.style.top = '';
             draggedCard.style.zIndex = '';
             draggedCard.classList.remove('dragging');
+            
+            // Remove table highlight
+            document.getElementById('cardsTable').classList.remove('drag-over');
+            
             draggedCard = null;
-        }
-
-        function handleDrop(e) {
-            e.preventDefault();
-            e.target.classList.remove('drag-over');
-            // Handled in dragEnd
+            draggedCardIndex = -1;
         }
 
         function isEventOverElement(e, element) {
@@ -1184,8 +1267,8 @@
         // Long press for action menu
         let longPressTimer;
         document.addEventListener('touchstart', (e) => {
-            const card = e.target.closest('.card');
-            if (!card) return;
+            const card = e.target.closest('.stack-card');
+            if (!card || card.classList.contains('dragging')) return;
             
             longPressTimer = setTimeout(() => {
                 card.classList.add('actions-visible');
@@ -1194,11 +1277,12 @@
         
         document.addEventListener('touchend', () => clearTimeout(longPressTimer));
         document.addEventListener('touchcancel', () => clearTimeout(longPressTimer));
+        document.addEventListener('touchmove', () => clearTimeout(longPressTimer));
         
         // Action menu buttons
         document.addEventListener('click', (e) => {
             if (e.target.classList.contains('action-menu-btn')) {
-                const card = e.target.closest('.card');
+                const card = e.target.closest('.stack-card');
                 const action = e.target.dataset.action;
                 const listingId = card.id;
                 const listing = listings.find(l => l.id === listingId);
@@ -1209,28 +1293,66 @@
                     if (action === 'report') {
                         listings = listings.filter(l => l.id !== listingId);
                         localStorage.setItem('freepile_listings', JSON.stringify(listings));
-                        renderGrid();
+                        renderTable();
                         showToast('⚠️ Reported');
                     }
                 }
                 
                 card.classList.remove('actions-visible');
             }
+            
+            // Close menu when clicking elsewhere
+            if (!e.target.closest('.action-menu-btn')) {
+                document.querySelectorAll('.stack-card.actions-visible').forEach(c => {
+                    c.classList.remove('actions-visible');
+                });
+            }
         });
+
+        // ==================== CREATE CARD ELEMENT ====================
+        function createCardElement(listing) {
+            const card = document.createElement('div');
+            card.className = `stack-card ${listing.type}`;
+            card.id = listing.id;
+            
+            card.innerHTML = `
+                <div class="drag-handle">⋮⋮</div>
+                <img src="${listing.image}" class="card-image" alt="" loading="lazy">
+                <div class="card-content">
+                    <div class="card-title">
+                        <span>${listing.title.substring(0, 30)}</span>
+                        <span class="card-price ${listing.type}">
+                            ${listing.type === 'free' ? 'FREE' : '$' + listing.price}
+                        </span>
+                    </div>
+                    <div class="card-meta">
+                        <span>@${listing.handle}</span>
+                        <span class="card-region">📍 ${listing.region}</span>
+                    </div>
+                </div>
+                <div class="card-actions">
+                    <button class="action-menu-btn details" data-action="details">📋 Details</button>
+                    <button class="action-menu-btn offer" data-action="offer">💰 Offer</button>
+                    <button class="action-menu-btn report" data-action="report">⚠️ Report</button>
+                </div>
+            `;
+            
+            return card;
+        }
 
         // ==================== PILE NAVIGATION ====================
         document.getElementById('tabFree').addEventListener('click', () => {
             currentPile = 'free';
             document.getElementById('tabFree').classList.add('active');
             document.getElementById('tabSale').classList.remove('active');
-            renderGrid();
+            renderTable();
         });
 
         document.getElementById('tabSale').addEventListener('click', () => {
             currentPile = 'sale';
             document.getElementById('tabSale').classList.add('active');
             document.getElementById('tabFree').classList.remove('active');
-            renderGrid();
+            renderTable();
         });
 
         // ==================== REGION SELECTOR ====================
@@ -1247,7 +1369,7 @@
             document.getElementById(`region${region.charAt(0).toUpperCase() + region.slice(1)}`).classList.add('active');
             
             updateRegionDisplay();
-            renderGrid();
+            renderTable();
         }
 
         function updateRegionDisplay() {
@@ -1257,46 +1379,29 @@
                 `📍 viewing <strong>${currentRegion}</strong> · travel mode`;
         }
 
-        // ==================== RENDER GRID ====================
+        // ==================== RENDER TABLE ====================
         function updateCounts() {
             const ottawaListings = listings.filter(l => l.region === HOME_REGION);
             document.getElementById('freeCount').textContent = ottawaListings.filter(l => l.type === 'free').length;
             document.getElementById('saleCount').textContent = ottawaListings.filter(l => l.type === 'sale').length;
         }
 
-        function renderGrid() {
-            const grid = document.getElementById('cardsGrid');
+        function renderTable() {
+            const table = document.getElementById('cardsTable');
             const filtered = listings.filter(l => l.region === currentRegion && l.type === currentPile);
             
             if (filtered.length === 0) {
-                grid.innerHTML = `<div class="empty-state">
+                table.innerHTML = `<div class="empty-state">
                     ✨ No items in ${currentRegion} ${currentPile} pile
                 </div>`;
                 return;
             }
 
-            grid.innerHTML = filtered.map(listing => `
-                <div class="card ${listing.type}" id="${listing.id}" draggable="false">
-                    <img src="${listing.image}" class="card-image" alt="" loading="lazy">
-                    <div class="card-content">
-                        <div class="card-title">
-                            <span>${listing.title.substring(0, 20)}</span>
-                            <span class="card-price ${listing.type}">
-                                ${listing.type === 'free' ? 'FREE' : '$' + listing.price}
-                            </span>
-                        </div>
-                        <div class="card-meta">
-                            <span>@${listing.handle}</span>
-                            <span class="card-region">📍 ${listing.region}</span>
-                        </div>
-                    </div>
-                    <div class="card-actions">
-                        <button class="action-menu-btn details" data-action="details">📋 Details</button>
-                        <button class="action-menu-btn offer" data-action="offer">💰 Make Offer</button>
-                        <button class="action-menu-btn report" data-action="report">⚠️ Report</button>
-                    </div>
-                </div>
-            `).join('');
+            // Create card elements
+            table.innerHTML = '';
+            filtered.forEach(listing => {
+                table.appendChild(createCardElement(listing));
+            });
         }
 
         // ==================== UTILITIES ====================
@@ -1309,7 +1414,14 @@
             toastTimeout = setTimeout(() => toast.classList.remove('show'), 3000);
         }
 
-        console.log('🚀 FREEPILE Ottawa · Full drag-drop experience');
+        // Prevent default touch actions
+        document.addEventListener('touchstart', (e) => {
+            if (e.target.closest('.stack-card')) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        console.log('🚀 FREEPILE Ottawa · Stackable drag-drop table ready');
     </script>
 </body>
 </html>
