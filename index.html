@@ -2,20 +2,21 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>FREEPILE Ottawa · snap · drop · done</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
             background: linear-gradient(135deg, #e62e2e 0%, #8b1e1e 100%);
             min-height: 100vh;
-            padding: 20px;
+            padding: 16px;
         }
 
         .container {
@@ -26,96 +27,98 @@
         header {
             text-align: center;
             color: white;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 20px;
+            gap: 15px;
             flex-wrap: wrap;
         }
 
         h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
+            font-size: 2em;
             display: flex;
             align-items: center;
-            gap: 10px;
-        }
-
-        .subtitle {
-            font-size: 1.1em;
-            opacity: 0.9;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
         }
 
         .region-badge {
             background: white;
             color: #e62e2e;
-            padding: 0.5rem 1.5rem;
+            padding: 0.4rem 1.2rem;
             border-radius: 40px;
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 700;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             gap: 0.5rem;
             box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
 
-        .region-badge::before {
-            content: "📍";
-        }
-
         .handle-section {
             background: rgba(255,255,255,0.2);
-            padding: 0.75rem 1.5rem;
+            padding: 0.6rem 1.2rem;
             border-radius: 50px;
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 0.8rem;
             backdrop-filter: blur(10px);
+            width: 100%;
+            max-width: 350px;
+            margin: 0 auto;
         }
 
         .handle-section input {
             background: white;
             border: none;
-            padding: 0.5rem 1rem;
+            padding: 0.6rem 1rem;
             border-radius: 30px;
             font-size: 1rem;
-            width: 150px;
+            flex: 1;
+            min-width: 120px;
         }
 
         .handle-section button {
             background: white;
             color: #e62e2e;
             border: none;
-            padding: 0.5rem 1.5rem;
+            padding: 0.6rem 1.2rem;
             border-radius: 30px;
             font-weight: 600;
             cursor: pointer;
             transition: transform 0.2s;
+            white-space: nowrap;
         }
 
-        .handle-section button:hover {
-            transform: scale(1.05);
+        .handle-section button:active {
+            transform: scale(0.95);
         }
 
         .region-selector {
             background: white;
             border-radius: 50px;
             padding: 0.5rem;
-            display: inline-flex;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
             gap: 0.25rem;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
 
         .region-btn {
-            padding: 0.75rem 1.5rem;
+            padding: 0.6rem 1.2rem;
             border-radius: 40px;
             border: none;
             background: transparent;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
+            font-size: 0.9rem;
+            flex: 1;
+            min-width: 80px;
         }
 
         .region-btn.active {
@@ -123,14 +126,14 @@
             color: white;
         }
 
-        .region-btn.ottawa {
-            font-weight: 700;
+        .region-btn:active {
+            opacity: 0.7;
         }
 
         .current-region {
             color: white;
-            font-size: 0.95rem;
-            margin-top: 10px;
+            font-size: 0.9rem;
+            margin: 10px 0 15px;
             background: rgba(0,0,0,0.2);
             padding: 0.5rem 1rem;
             border-radius: 30px;
@@ -140,60 +143,82 @@
         .upload-section {
             background: white;
             border-radius: 20px;
-            padding: 40px;
-            margin-bottom: 30px;
+            padding: 25px;
+            margin-bottom: 25px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
 
         .upload-area {
             border: 3px dashed #cbd5e0;
             border-radius: 15px;
-            padding: 40px;
+            padding: 30px 20px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s;
             background: #f7fafc;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
 
-        .upload-area:hover, .upload-area.dragover {
+        .upload-area:active {
+            background: #f0f4ff;
             border-color: #e62e2e;
-            background: #fef2f2;
         }
 
         .upload-area i {
-            font-size: 64px;
+            font-size: 48px;
             color: #e62e2e;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             display: block;
+        }
+
+        .upload-area h3 {
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+        }
+
+        .upload-area p {
+            font-size: 0.9rem;
+            color: #64748b;
         }
 
         .upload-btn {
             background: #e62e2e;
             color: white;
             border: none;
-            padding: 12px 30px;
+            padding: 12px 25px;
             border-radius: 25px;
             font-size: 1em;
             cursor: pointer;
-            margin: 20px 0 10px;
+            margin: 15px 0 5px;
             transition: transform 0.2s;
+            width: auto;
+            min-width: 160px;
         }
 
-        .upload-btn:hover {
-            transform: scale(1.05);
+        .upload-btn:active {
+            transform: scale(0.95);
             background: #c41e1e;
+        }
+
+        #fileInput {
+            display: none;
         }
 
         .file-info {
             color: #718096;
-            font-size: 0.9em;
-            margin-top: 10px;
+            font-size: 0.85em;
+            margin-top: 8px;
+            word-break: break-word;
         }
 
         .loading {
             display: none;
             text-align: center;
-            padding: 30px;
+            padding: 20px;
         }
 
         .loading.show {
@@ -201,13 +226,13 @@
         }
 
         .spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid #e2e8f0;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e2e8f0;
             border-top-color: #e62e2e;
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin: 20px auto;
+            margin: 15px auto;
         }
 
         @keyframes spin {
@@ -217,8 +242,8 @@
         .results-section {
             background: white;
             border-radius: 20px;
-            padding: 30px;
-            margin-top: 30px;
+            padding: 20px;
+            margin-top: 20px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
 
@@ -228,21 +253,26 @@
 
         .result-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            margin-top: 20px;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        @media (min-width: 640px) {
+            .result-grid {
+                grid-template-columns: 1fr 1fr;
+            }
         }
 
         .preview-container {
             background: #f7fafc;
             border-radius: 15px;
-            padding: 20px;
+            padding: 15px;
             text-align: center;
         }
 
         .preview-container img {
             max-width: 100%;
-            max-height: 300px;
+            max-height: 250px;
             border-radius: 10px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
@@ -257,71 +287,96 @@
             display: inline-block;
             background: #e62e2e;
             color: white;
-            padding: 8px 20px;
+            padding: 8px 16px;
             border-radius: 25px;
-            font-size: 1.1em;
+            font-size: 1em;
             font-weight: 600;
-            margin: 10px 0;
+            margin: 8px 0;
         }
 
         .confidence-meter {
             background: #e2e8f0;
-            height: 10px;
-            border-radius: 5px;
-            margin: 10px 0;
+            height: 8px;
+            border-radius: 4px;
+            margin: 8px 0;
             overflow: hidden;
         }
 
         .confidence-fill {
             height: 100%;
             background: #48bb78;
-            border-radius: 5px;
+            border-radius: 4px;
             transition: width 0.5s;
         }
 
         .tag-container {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
-            margin: 15px 0;
+            gap: 8px;
+            margin: 12px 0;
         }
 
         .tag {
             background: #e2e8f0;
             color: #4a5568;
-            padding: 5px 12px;
+            padding: 4px 10px;
             border-radius: 15px;
-            font-size: 0.9em;
+            font-size: 0.85em;
         }
 
         .description-box {
             background: white;
             border-left: 4px solid #e62e2e;
-            padding: 15px;
-            margin: 20px 0;
-            border-radius: 0 10px 10px 0;
+            padding: 12px;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
             font-style: italic;
             color: #4a5568;
+            font-size: 0.95em;
+        }
+
+        #editableDescription {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            margin: 10px 0 15px;
+            font-size: 0.95em;
+            resize: vertical;
+            min-height: 80px;
         }
 
         .action-buttons {
             display: flex;
-            gap: 15px;
-            margin-top: 20px;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        @media (min-width: 480px) {
+            .action-buttons {
+                flex-direction: row;
+            }
         }
 
         .action-btn {
             flex: 1;
-            padding: 12px;
+            padding: 14px;
             border: none;
-            border-radius: 10px;
+            border-radius: 12px;
             font-size: 1em;
+            font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s;
+            transition: all 0.2s;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
+            min-height: 52px;
+        }
+
+        .action-btn:active {
+            transform: scale(0.97);
         }
 
         .action-btn.free {
@@ -336,29 +391,37 @@
             border: 2px solid #fecaca;
         }
 
-        .action-btn:hover {
-            transform: translateY(-2px);
-        }
-
         .pile-nav {
             display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            border-bottom: 2px solid #e2e8f0;
-            padding-bottom: 0.5rem;
+            flex-direction: column;
+            gap: 10px;
+            margin: 20px 0 15px;
+        }
+
+        @media (min-width: 480px) {
+            .pile-nav {
+                flex-direction: row;
+            }
         }
 
         .pile-tab {
-            padding: 0.75rem 2rem;
-            font-size: 1.25rem;
+            flex: 1;
+            padding: 14px;
+            font-size: 1.1em;
             font-weight: 600;
             cursor: pointer;
-            border-radius: 40px 40px 0 0;
+            border-radius: 40px;
             transition: all 0.2s;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            justify-content: center;
+            gap: 8px;
             background: white;
+            border: 2px solid transparent;
+        }
+
+        .pile-tab:active {
+            transform: scale(0.97);
         }
 
         .pile-tab.active {
@@ -366,17 +429,26 @@
             color: white;
         }
 
+        .pile-tab.free.active {
+            background: #166534;
+        }
+
+        .pile-tab.sale.active {
+            background: #991b1b;
+        }
+
         .pile-tab .count {
             background: rgba(255,255,255,0.2);
-            padding: 0.25rem 0.75rem;
+            padding: 4px 10px;
             border-radius: 40px;
-            font-size: 0.85rem;
+            font-size: 0.85em;
         }
 
         .cards-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
         }
 
         .card {
@@ -388,9 +460,8 @@
             border: 1px solid #e2e8f0;
         }
 
-        .card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+        .card:active {
+            transform: scale(0.98);
         }
 
         .card.free {
@@ -403,25 +474,27 @@
 
         .card-image {
             width: 100%;
-            height: 180px;
+            height: 140px;
             object-fit: cover;
             background: #f1f5f9;
         }
 
         .card-content {
-            padding: 1rem;
+            padding: 12px;
         }
 
         .card-title {
             font-weight: 600;
-            font-size: 1.1rem;
-            margin-bottom: 0.5rem;
+            font-size: 0.95em;
+            margin-bottom: 6px;
             display: flex;
             justify-content: space-between;
+            align-items: center;
         }
 
         .card-price {
             font-weight: 700;
+            font-size: 0.9em;
         }
 
         .card-price.free {
@@ -436,85 +509,79 @@
             display: flex;
             justify-content: space-between;
             color: #64748b;
-            font-size: 0.85rem;
-            margin-top: 0.5rem;
+            font-size: 0.75em;
+            margin-top: 6px;
         }
 
         .card-region {
             background: #f1f5f9;
-            padding: 0.25rem 0.75rem;
+            padding: 3px 8px;
             border-radius: 40px;
-            font-size: 0.75rem;
         }
 
         .ml-badge {
             background: #e2e8f0;
-            padding: 0.25rem 0.75rem;
+            padding: 3px 8px;
             border-radius: 40px;
-            font-size: 0.7rem;
+            font-size: 0.65em;
             display: inline-block;
-            margin-top: 0.5rem;
+            margin-top: 6px;
         }
 
         .empty-state {
             text-align: center;
-            padding: 4rem;
+            padding: 40px 20px;
             color: #94a3b8;
             grid-column: 1 / -1;
+            background: white;
+            border-radius: 16px;
         }
 
         .hosting-info {
             background: #2d3748;
             color: white;
-            padding: 10px 20px;
-            border-radius: 10px;
-            margin-top: 30px;
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 25px;
             text-align: center;
-            font-size: 0.9em;
+            font-size: 0.85em;
         }
 
         .hosting-info a {
             color: #9ae6b4;
             text-decoration: none;
             cursor: pointer;
+            padding: 4px 8px;
+            display: inline-block;
         }
 
-        .hosting-info a:hover {
-            text-decoration: underline;
+        .hosting-info a:active {
+            opacity: 0.7;
         }
 
         .toast {
             position: fixed;
-            bottom: 30px;
-            right: 30px;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
             background: #2d3748;
             color: white;
-            padding: 15px 25px;
-            border-radius: 10px;
+            padding: 15px 20px;
+            border-radius: 12px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            transform: translateY(100px);
+            transform: translateY(150%);
             opacity: 0;
             transition: all 0.3s;
             z-index: 1000;
+            text-align: center;
+            font-weight: 500;
+            max-width: 400px;
+            margin: 0 auto;
         }
 
         .toast.show {
             transform: translateY(0);
             opacity: 1;
-        }
-
-        @media (max-width: 768px) {
-            .result-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            h1 {
-                font-size: 2em;
-            }
-
-            .pile-nav {
-                flex-direction: column;
-            }
         }
     </style>
 </head>
@@ -526,7 +593,7 @@
                 <span class="region-badge">Ottawa</span>
             </h1>
             <div class="handle-section">
-                <input type="text" id="handleInput" placeholder="your handle" maxlength="20">
+                <input type="text" id="handleInput" placeholder="your handle" maxlength="20" inputmode="text">
                 <button id="saveHandle">save</button>
             </div>
         </header>
@@ -546,16 +613,17 @@
 
         <!-- Upload Section -->
         <div class="upload-section">
+            <!-- Mobile-friendly upload area - uses click only, no drag -->
             <div class="upload-area" id="uploadArea">
                 <i>📤</i>
-                <h3>Drag & Drop or Click to Upload</h3>
-                <p>One photo · ML will identify it · Ottawa only</p>
-                <button class="upload-btn" onclick="event.stopPropagation(); document.getElementById('fileInput').click()">
-                    Choose Image
+                <h3>Tap to take a photo</h3>
+                <p>One photo · ML will identify it</p>
+                <button class="upload-btn" id="uploadButton">
+                    📸 Choose Image
                 </button>
-                <input type="file" id="fileInput" accept="image/*" style="display: none;">
                 <div class="file-info" id="fileInfo"></div>
             </div>
+            <input type="file" id="fileInput" accept="image/*" capture="environment">
 
             <div class="loading" id="loading">
                 <div class="spinner"></div>
@@ -566,7 +634,7 @@
 
         <!-- Results Section -->
         <div class="results-section hidden" id="resultsSection">
-            <h2 style="margin-bottom: 20px; color: #2d3748;">✨ AI Analysis</h2>
+            <h2 style="margin-bottom: 15px; color: #2d3748; font-size: 1.3em;">✨ AI Analysis</h2>
             
             <div class="result-grid">
                 <div class="preview-container">
@@ -574,26 +642,26 @@
                 </div>
 
                 <div class="analysis-container">
-                    <div style="margin-bottom: 20px;">
-                        <span style="color: #718096;">Category</span>
+                    <div style="margin-bottom: 15px;">
+                        <span style="color: #718096; font-size: 0.9em;">Category</span>
                         <div class="category-badge" id="categoryDisplay">Loading...</div>
                     </div>
 
-                    <div style="margin-bottom: 20px;">
-                        <span style="color: #718096;">Confidence</span>
+                    <div style="margin-bottom: 15px;">
+                        <span style="color: #718096; font-size: 0.9em;">Confidence</span>
                         <div class="confidence-meter">
                             <div class="confidence-fill" id="confidenceFill" style="width: 0%"></div>
                         </div>
-                        <span id="confidenceValue">0%</span>
+                        <span id="confidenceValue" style="font-size: 0.9em;">0%</span>
                     </div>
 
-                    <div style="margin-bottom: 20px;">
-                        <span style="color: #718096;">Tags</span>
+                    <div style="margin-bottom: 15px;">
+                        <span style="color: #718096; font-size: 0.9em;">Tags</span>
                         <div class="tag-container" id="tagContainer"></div>
                     </div>
 
-                    <div style="margin-bottom: 20px;">
-                        <span style="color: #718096;">Description</span>
+                    <div style="margin-bottom: 15px;">
+                        <span style="color: #718096; font-size: 0.9em;">Description</span>
                         <div class="description-box" id="descriptionBox">
                             Analyzing image content...
                         </div>
@@ -603,14 +671,14 @@
                         ✏️ you can edit the description below
                     </div>
                     
-                    <textarea id="editableDescription" rows="3" style="width:100%; padding:0.75rem; border:1px solid #cbd5e1; border-radius:8px; margin-bottom:1rem;">Loading...</textarea>
+                    <textarea id="editableDescription" rows="3" placeholder="Edit description...">Loading...</textarea>
 
                     <div class="action-buttons">
                         <button class="action-btn free" id="dropFree">
-                            🆓 drop in FREE pile
+                            🆓 FREE pile
                         </button>
                         <button class="action-btn sale" id="dropSale">
-                            💰 drop in FOR SALE pile
+                            💰 FOR SALE
                         </button>
                     </div>
                 </div>
@@ -620,10 +688,10 @@
         <!-- Pile Navigation -->
         <div class="pile-nav">
             <div class="pile-tab free active" id="tabFree">
-                🆓 FREE pile <span class="count" id="freeCount">0</span>
+                🆓 FREE <span class="count" id="freeCount">0</span>
             </div>
             <div class="pile-tab sale" id="tabSale">
-                💰 FOR SALE pile <span class="count" id="saleCount">0</span>
+                💰 FOR SALE <span class="count" id="saleCount">0</span>
             </div>
         </div>
 
@@ -632,11 +700,12 @@
 
         <!-- Hosting Info -->
         <div class="hosting-info">
-            🚀 <strong>Free Hosting:</strong> Deploy on <a onclick="showHostingOptions()">GitHub Pages</a> • 
+            🚀 <strong>Free Hosting:</strong> 
+            <a onclick="showHostingOptions()">GitHub Pages</a> • 
             <a onclick="showHostingOptions()">Netlify</a> • 
             <a onclick="showHostingOptions()">Vercel</a>
             <br>
-            <small>No credit card required · Ottawa's free pile</small>
+            <small>Ottawa's free pile · no login required</small>
         </div>
     </div>
 
@@ -695,84 +764,54 @@
             }
         });
 
-        // ==================== REGION SELECTOR ====================
-        document.getElementById('regionOttawa').addEventListener('click', () => setRegion('ottawa'));
-        document.getElementById('regionMontreal').addEventListener('click', () => setRegion('montreal'));
-        document.getElementById('regionToronto').addEventListener('click', () => setRegion('toronto'));
-        document.getElementById('regionVancouver').addEventListener('click', () => setRegion('vancouver'));
-
-        function setRegion(region) {
-            currentRegion = region;
-            localStorage.setItem('freepile_current_region', region);
-            
-            document.querySelectorAll('.region-btn').forEach(btn => btn.classList.remove('active'));
-            if (region === 'ottawa') document.getElementById('regionOttawa').classList.add('active');
-            if (region === 'montreal') document.getElementById('regionMontreal').classList.add('active');
-            if (region === 'toronto') document.getElementById('regionToronto').classList.add('active');
-            if (region === 'vancouver') document.getElementById('regionVancouver').classList.add('active');
-            
-            updateRegionDisplay();
-            renderGrid();
-        }
-
-        function updateRegionDisplay() {
-            const display = document.getElementById('currentRegionDisplay');
-            if (currentRegion === HOME_REGION) {
-                display.innerHTML = `📍 viewing <strong>Ottawa</strong> · your home pile`;
-            } else {
-                display.innerHTML = `📍 viewing <strong>${currentRegion}</strong> · travel mode`;
-            }
-        }
-
-        // ==================== UPLOAD ====================
+        // ==================== MOBILE-FRIENDLY UPLOAD ====================
         const uploadArea = document.getElementById('uploadArea');
+        const uploadButton = document.getElementById('uploadButton');
         const fileInput = document.getElementById('fileInput');
 
-        uploadArea.addEventListener('click', () => fileInput.click());
-        
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadArea.classList.add('dragover');
+        // Simple click handler for both area and button
+        function openFilePicker() {
+            fileInput.click();
+        }
+
+        uploadArea.addEventListener('click', openFilePicker);
+        uploadButton.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent double triggering
+            fileInput.click();
         });
 
-        uploadArea.addEventListener('dragleave', () => {
-            uploadArea.classList.remove('dragover');
-        });
-
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.classList.remove('dragover');
-            const file = e.dataTransfer.files[0];
-            if (file && file.type.startsWith('image/')) {
-                handleFileSelect(file);
-            } else {
-                showToast('Please upload an image file');
-            }
-        });
-
+        // Handle file selection
         fileInput.addEventListener('change', (e) => {
-            if (e.target.files[0]) handleFileSelect(e.target.files[0]);
+            const file = e.target.files[0];
+            if (file) {
+                handleFileSelect(file);
+            }
         });
 
         async function handleFileSelect(file) {
             if (!file) return;
             
+            // Check file size (10MB limit)
             if (file.size > 10 * 1024 * 1024) {
                 showToast('File too large (max 10MB)');
                 return;
             }
 
-            document.getElementById('fileInfo').textContent = `Selected: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+            // Show file info
+            document.getElementById('fileInfo').textContent = `Selected: ${file.name.substring(0, 30)} (${(file.size / 1024).toFixed(0)} KB)`;
             
+            // Show preview
             const reader = new FileReader();
             reader.onload = (e) => {
                 document.getElementById('previewImage').src = e.target.result;
             };
             reader.readAsDataURL(file);
             
+            // Show loading
             document.getElementById('loading').classList.add('show');
             document.getElementById('resultsSection').classList.add('hidden');
             
+            // Analyze image
             await analyzeImage(file);
         }
 
@@ -1020,15 +1059,16 @@
             listings.push(listing);
             localStorage.setItem('freepile_listings', JSON.stringify(listings));
 
+            // Reset
             document.getElementById('resultsSection').classList.add('hidden');
-            document.getElementById('fileInput').value = '';
+            fileInput.value = '';
             document.getElementById('fileInfo').textContent = '';
             currentAnalyzedItem = null;
             
             updateCounts();
             renderGrid();
             
-            showToast(`✅ dropped in ${type === 'free' ? 'FREE' : 'FOR SALE'} pile · Ottawa`);
+            showToast(`✅ dropped in ${type === 'free' ? 'FREE' : 'FOR SALE'} pile`);
         }
 
         // ==================== PILE NAVIGATION ====================
@@ -1045,6 +1085,32 @@
             document.getElementById('tabFree').classList.remove('active');
             renderGrid();
         });
+
+        // ==================== REGION SELECTOR ====================
+        document.getElementById('regionOttawa').addEventListener('click', () => setRegion('ottawa'));
+        document.getElementById('regionMontreal').addEventListener('click', () => setRegion('montreal'));
+        document.getElementById('regionToronto').addEventListener('click', () => setRegion('toronto'));
+        document.getElementById('regionVancouver').addEventListener('click', () => setRegion('vancouver'));
+
+        function setRegion(region) {
+            currentRegion = region;
+            localStorage.setItem('freepile_current_region', region);
+            
+            document.querySelectorAll('.region-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`region${region.charAt(0).toUpperCase() + region.slice(1)}`).classList.add('active');
+            
+            updateRegionDisplay();
+            renderGrid();
+        }
+
+        function updateRegionDisplay() {
+            const display = document.getElementById('currentRegionDisplay');
+            if (currentRegion === HOME_REGION) {
+                display.innerHTML = `📍 viewing <strong>Ottawa</strong> · your home pile`;
+            } else {
+                display.innerHTML = `📍 viewing <strong>${currentRegion}</strong> · travel mode`;
+            }
+        }
 
         // ==================== RENDER GRID ====================
         function updateCounts() {
@@ -1065,17 +1131,17 @@
             if (filtered.length === 0) {
                 grid.innerHTML = `<div class="empty-state">
                     ✨ ${currentPile === 'free' ? 'FREE' : 'FOR SALE'} pile in ${currentRegion} is empty
-                    ${currentRegion === HOME_REGION ? '· snap something!' : '· try your home pile'}
+                    ${currentRegion === HOME_REGION ? '· tap above to add' : '· check your home pile'}
                 </div>`;
                 return;
             }
 
             grid.innerHTML = filtered.map(listing => `
                 <div class="card ${listing.type}">
-                    <img src="${listing.image}" class="card-image" alt="${listing.title}">
+                    <img src="${listing.image}" class="card-image" alt="${listing.title}" loading="lazy">
                     <div class="card-content">
                         <div class="card-title">
-                            ${listing.title}
+                            <span>${listing.title.substring(0, 20)}</span>
                             <span class="card-price ${listing.type}">
                                 ${listing.type === 'free' ? 'FREE' : '$' + listing.price}
                             </span>
@@ -1084,7 +1150,7 @@
                             <span>@${listing.handle}</span>
                             <span class="card-region">📍 ${listing.region}</span>
                         </div>
-                        <div class="ml-badge">🤖 ML-suggested</div>
+                        <div class="ml-badge">🤖 ML</div>
                     </div>
                 </div>
             `).join('');
@@ -1104,14 +1170,10 @@
         }
 
         function showHostingOptions() {
-            alert('✨ FREE HOSTING:\n\nGitHub Pages: username.github.io\nNetlify: drag & drop\nVercel: connect Git repo\n\nAll free with SSL!');
+            alert('✨ FREE HOSTING:\n\n• GitHub Pages: push to username.github.io\n• Netlify: drag & drop folder\n• Vercel: connect Git repo\n\nAll include free SSL!');
         }
 
-        // Prevent default drag/drop on document
-        document.addEventListener('dragover', (e) => e.preventDefault());
-        document.addEventListener('drop', (e) => e.preventDefault());
-
-        console.log('🚀 FREEPILE Ottawa ready!');
+        console.log('📱 FREEPILE Ottawa · mobile ready');
     </script>
 </body>
 </html>
