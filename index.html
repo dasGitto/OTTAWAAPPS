@@ -2,1025 +2,733 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>SnapDrop — Mobile Marketplace</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FREEPILE Ottawa · snap · drop · done</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
-
-        :root {
-            --bg: #f5f0e8;
-            --surface: #faf7f2;
-            --card-bg: #ffffff;
-            --ink: #1a1410;
-            --ink-soft: #6b5f52;
-            --accent: #e8440a;
-            --accent-soft: #fff0eb;
-            --felt: #2d4a3e;
-            --felt-light: #3a6052;
-            --tag-bg: #f0ebe0;
-            --border: #e0d8cc;
-            --shadow: rgba(0,0,0,0.12);
-        }
-
-        * { 
-            box-sizing: border-box; 
-            margin: 0; 
-            padding: 0; 
-            -webkit-tap-highlight-color: transparent; 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         body {
-            font-family: 'DM Sans', sans-serif;
-            background: var(--bg);
-            color: var(--ink);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #e62e2e 0%, #8b1e1e 100%);
             min-height: 100vh;
-            overflow: hidden;
-            position: fixed;
-            width: 100%;
-            height: 100%;
+            padding: 20px;
         }
 
-        /* ── VIEWS ── */
-        .view { 
-            position: absolute; 
-            inset: 0; 
-            transition: transform 0.45s cubic-bezier(0.4,0,0.2,1), opacity 0.45s ease; 
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-        .view.hidden-left  { transform: translateX(-100%); opacity: 0; pointer-events: none; }
-        .view.hidden-right { transform: translateX(100%);  opacity: 0; pointer-events: none; }
-        .view.visible      { transform: translateX(0);     opacity: 1; }
-
-        /* ── HOME VIEW ── */
-        #homeView {
-            background: var(--bg);
-            padding: 16px;
-            padding-bottom: 80px;
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
         }
 
-        .wordmark {
-            font-family: 'Syne', sans-serif;
-            font-weight: 800;
-            font-size: clamp(28px, 8vw, 36px);
-            color: var(--ink);
-            letter-spacing: -1px;
-            margin-bottom: 8px;
+        header {
             text-align: center;
-        }
-
-        .wordmark span { color: var(--accent); }
-
-        .tagline {
-            color: var(--ink-soft);
-            margin-bottom: 20px;
-            text-align: center;
-            font-size: clamp(13px, 4vw, 16px);
-        }
-
-        /* Mobile Upload Area - BIGGER for fat fingers */
-        .upload-area {
-            background: var(--card-bg);
-            border: 3px dashed var(--border);
-            border-radius: clamp(20px, 5vw, 28px);
-            padding: clamp(30px, 10vw, 50px) 16px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-bottom: 20px;
-            min-height: 200px;
+            color: white;
+            margin-bottom: 30px;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-        }
-
-        .upload-area:active {
-            transform: scale(0.98);
-            background: var(--accent-soft);
-        }
-
-        .upload-icon {
-            font-size: clamp(48px, 15vw, 72px);
-            margin-bottom: 12px;
-        }
-
-        .upload-area h3 {
-            font-size: clamp(18px, 5vw, 24px);
-            margin-bottom: 8px;
-        }
-
-        .upload-area p {
-            font-size: clamp(14px, 4vw, 16px);
-            color: var(--ink-soft);
-        }
-
-        .upload-btn {
-            background: var(--accent);
-            color: white;
-            border: none;
-            padding: clamp(14px, 4vw, 18px) clamp(24px, 6vw, 36px);
-            border-radius: 50px;
-            font-size: clamp(16px, 5vw, 18px);
-            font-weight: 600;
-            cursor: pointer;
-            margin: 16px 0 8px;
-            width: 100%;
-            max-width: 300px;
-            touch-action: manipulation;
-        }
-
-        .upload-btn:active { 
-            transform: scale(0.96); 
-            background: #c73800;
-        }
-
-        /* Loading - Mobile optimized */
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 30px 20px;
-            background: var(--surface);
-            border-radius: 24px;
-            margin-bottom: 20px;
-        }
-
-        .loading.show { display: block; }
-
-        .spinner {
-            width: clamp(40px, 12vw, 60px);
-            height: clamp(40px, 12vw, 60px);
-            border: 4px solid var(--border);
-            border-top-color: var(--accent);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 15px auto;
-        }
-
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        .loading p {
-            font-size: clamp(16px, 4.5vw, 18px);
-            margin: 10px 0;
-        }
-
-        /* AI Result - Mobile friendly */
-        .ai-result {
-            background: var(--surface);
-            border-radius: 24px;
-            padding: 20px;
-            margin-bottom: 20px;
-            display: none;
-        }
-
-        .ai-result.show { display: block; }
-
-        .result-image {
-            width: 100%;
-            aspect-ratio: 1;
-            object-fit: cover;
-            border-radius: 20px;
-            margin-bottom: 16px;
-        }
-
-        .ai-category {
-            display: inline-block;
-            background: var(--accent);
-            color: white;
-            padding: clamp(8px, 2.5vw, 12px) clamp(16px, 4vw, 24px);
-            border-radius: 30px;
-            font-weight: 600;
-            font-size: clamp(14px, 4vw, 16px);
-            margin: 8px 0;
-        }
-
-        .ai-tags {
-            display: flex;
+            gap: 20px;
             flex-wrap: wrap;
-            gap: 8px;
-            margin: 15px 0;
         }
 
-        .ai-tag {
-            background: var(--tag-bg);
-            color: var(--ink);
-            padding: clamp(8px, 2.5vw, 10px) clamp(12px, 3vw, 16px);
-            border-radius: 25px;
-            font-size: clamp(13px, 3.5vw, 15px);
-        }
-
-        .ai-description {
-            background: var(--card-bg);
-            padding: clamp(16px, 4vw, 20px);
-            border-radius: 16px;
-            color: var(--ink-soft);
-            font-style: italic;
-            margin: 16px 0;
-            border-left: 4px solid var(--accent);
-            font-size: clamp(14px, 4vw, 16px);
-            line-height: 1.5;
-        }
-
-        /* Mobile Add Button - BIG */
-        .add-to-pile-btn {
-            width: 100%;
-            background: var(--felt);
-            color: white;
-            border: none;
-            padding: clamp(18px, 5vw, 22px);
-            border-radius: 50px;
-            font-size: clamp(18px, 5vw, 20px);
-            font-weight: 600;
-            cursor: pointer;
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
             display: flex;
             align-items: center;
-            justify-content: center;
             gap: 10px;
-            touch-action: manipulation;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
 
-        .add-to-pile-btn:active { 
-            transform: scale(0.97);
-            background: #1e3a2e;
+        .subtitle {
+            font-size: 1.1em;
+            opacity: 0.9;
         }
 
-        /* Recent Items - Horizontal scroll for mobile */
-        .recent-section {
-            margin-top: 24px;
-        }
-
-        .recent-section h3 {
-            font-size: clamp(18px, 5vw, 22px);
-            margin-bottom: 12px;
-            padding-left: 4px;
-        }
-
-        .recent-scroll {
-            display: flex;
-            gap: 12px;
-            overflow-x: auto;
-            padding-bottom: 12px;
-            scrollbar-width: none;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .recent-scroll::-webkit-scrollbar { display: none; }
-
-        .recent-item {
-            flex-shrink: 0;
-            width: clamp(90px, 25vw, 110px);
-            text-align: center;
-            cursor: pointer;
-            touch-action: manipulation;
-        }
-
-        .recent-image {
-            width: 100%;
-            aspect-ratio: 1;
-            background: var(--tag-bg);
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: clamp(36px, 10vw, 48px);
-            margin-bottom: 6px;
-            box-shadow: 0 2px 8px var(--shadow);
-        }
-
-        .recent-item span {
-            font-size: clamp(12px, 3.5vw, 14px);
-            color: var(--ink-soft);
-        }
-
-        /* ── TABLE VIEW - MOBILE OPTIMIZED ── */
-        #tableView {
-            background: var(--felt);
-            overflow: hidden;
-        }
-
-        .table-header {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 100;
-            padding: 48px 16px 16px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: linear-gradient(to bottom, rgba(45,74,62,0.98) 70%, transparent);
-        }
-
-        .back-btn {
-            width: clamp(44px, 12vw, 48px);
-            height: clamp(44px, 12vw, 48px);
-            border-radius: 50%;
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: white;
-            font-size: clamp(22px, 6vw, 24px);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(4px);
-            touch-action: manipulation;
-        }
-
-        .back-btn:active { background: rgba(255,255,255,0.4); }
-
-        .table-title {
-            font-family: 'Syne', sans-serif;
-            font-size: clamp(18px, 5vw, 22px);
-            font-weight: 700;
-            color: white;
-        }
-
-        .table-subtitle {
-            font-size: clamp(12px, 3.5vw, 14px);
-            color: rgba(255,255,255,0.7);
-        }
-
-        /* Table surface - same but cards optimized */
-        .table-surface {
-            position: absolute;
-            inset: 0;
-            overflow: hidden;
-            touch-action: none;
-        }
-
-        .table-card {
-            position: absolute;
-            width: min(140px, 35vw);
-            border-radius: 16px;
-            background: var(--card-bg);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
-            cursor: grab;
-            transition: box-shadow 0.25s, transform 0.25s;
-            user-select: none;
-            overflow: hidden;
-            touch-action: none;
-        }
-
-        .table-card:active {
-            cursor: grabbing;
-        }
-
-        .card-photo {
-            width: 100%;
-            aspect-ratio: 1;
-            object-fit: cover;
-            background: var(--tag-bg);
-        }
-
-        .card-body {
-            padding: clamp(6px, 2vw, 8px) clamp(6px, 2vw, 8px);
-        }
-
-        .card-category {
-            font-size: clamp(8px, 2.5vw, 10px);
-            font-weight: 700;
-            letter-spacing: 1px;
-            color: var(--accent);
-        }
-
-        .card-desc {
-            font-size: clamp(10px, 3vw, 12px);
-            color: var(--ink);
-            font-weight: 500;
-            line-height: 1.3;
-            margin-bottom: 4px;
-        }
-
-        .card-location {
-            font-size: clamp(8px, 2.5vw, 10px);
-            color: var(--ink-soft);
-        }
-
-        /* Category pills - scrollable for mobile */
-        .table-cat-bar {
-            position: absolute;
-            bottom: 20px;
-            left: 0;
-            right: 0;
-            z-index: 100;
-            display: flex;
-            gap: 8px;
-            overflow-x: auto;
-            padding: 0 16px;
-            scrollbar-width: none;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .table-cat-pill {
-            flex-shrink: 0;
-            padding: clamp(10px, 3vw, 12px) clamp(16px, 4vw, 20px);
-            border-radius: 40px;
-            font-size: clamp(13px, 3.5vw, 15px);
-            font-weight: 600;
-            cursor: pointer;
-            background: rgba(255,255,255,0.2);
-            color: white;
-            backdrop-filter: blur(8px);
-            white-space: nowrap;
-            border: 1px solid rgba(255,255,255,0.3);
-            touch-action: manipulation;
-        }
-
-        .table-cat-pill:active {
-            transform: scale(0.96);
-            background: rgba(255,255,255,0.4);
-        }
-
-        /* ── MOBILE DETAIL MODAL ── */
-        .detail-modal {
-            position: fixed;
-            inset: 0;
-            z-index: 1000;
-            background: var(--surface);
-            display: none;
-            flex-direction: column;
-            overflow-y: auto;
-            animation: slideUp 0.3s ease;
-        }
-
-        @keyframes slideUp {
-            from { transform: translateY(100%); }
-            to { transform: translateY(0); }
-        }
-
-        .detail-modal.show { display: flex; }
-
-        .detail-header {
-            position: sticky;
-            top: 0;
-            background: var(--surface);
-            padding: 16px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            z-index: 10;
-        }
-
-        .close-detail {
-            width: clamp(44px, 12vw, 48px);
-            height: clamp(44px, 12vw, 48px);
-            border-radius: 50%;
-            background: var(--tag-bg);
-            border: none;
-            font-size: clamp(20px, 6vw, 24px);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            touch-action: manipulation;
-        }
-
-        .detail-title {
-            font-family: 'Syne', sans-serif;
-            font-size: clamp(18px, 5vw, 22px);
-            font-weight: 700;
-            color: var(--ink);
-            flex: 1;
-        }
-
-        .detail-image {
-            width: 100%;
-            aspect-ratio: 1;
-            object-fit: cover;
-        }
-
-        .detail-content {
-            padding: 20px;
-        }
-
-        .detail-category {
-            display: inline-block;
-            background: var(--accent);
-            color: white;
-            padding: clamp(8px, 2.5vw, 10px) clamp(16px, 4vw, 20px);
-            border-radius: 30px;
-            font-weight: 600;
-            font-size: clamp(14px, 4vw, 16px);
-            margin-bottom: 16px;
-        }
-
-        .detail-price {
-            font-size: clamp(28px, 8vw, 36px);
-            font-weight: 700;
-            color: var(--ink);
-            margin-bottom: 16px;
-        }
-
-        .detail-price small {
-            font-size: clamp(14px, 4vw, 16px);
-            font-weight: 400;
-            color: var(--ink-soft);
-        }
-
-        .detail-meta {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin: 20px 0;
-            padding: 16px 0;
-            border-top: 1px solid var(--border);
-            border-bottom: 1px solid var(--border);
-        }
-
-        .meta-item {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .meta-label {
-            font-size: clamp(11px, 3vw, 12px);
-            color: var(--ink-soft);
-        }
-
-        .meta-value {
-            font-size: clamp(14px, 4vw, 16px);
-            font-weight: 600;
-        }
-
-        .detail-description {
-            background: var(--tag-bg);
-            padding: clamp(16px, 4vw, 20px);
-            border-radius: 20px;
-            margin: 20px 0;
-            line-height: 1.6;
-            font-size: clamp(15px, 4vw, 17px);
-        }
-
-        /* MOBILE ACTION GRID - BIG BUTTONS */
-        .action-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin: 24px 0;
-        }
-
-        .action-btn {
-            padding: clamp(18px, 5vw, 22px) 12px;
-            border: none;
-            border-radius: 20px;
-            font-size: clamp(15px, 4.5vw, 17px);
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-            background: var(--surface);
-            border: 2px solid var(--border);
-            touch-action: manipulation;
-        }
-
-        .action-btn:active {
-            transform: scale(0.96);
-        }
-
-        .action-btn .emoji {
-            font-size: clamp(28px, 8vw, 36px);
-        }
-
-        .action-btn.offer {
-            background: var(--accent);
-            color: white;
-            border-color: var(--accent);
-        }
-
-        .action-btn.save {
-            background: var(--felt);
-            color: white;
-            border-color: var(--felt);
-        }
-
-        .action-btn.ask {
-            background: var(--ink);
-            color: white;
-            border-color: var(--ink);
-        }
-
-        .action-btn.report {
+        .region-badge {
             background: white;
-            color: #dc2626;
-            border-color: #dc2626;
-        }
-
-        /* Seller info */
-        .seller-info {
+            color: #e62e2e;
+            padding: 0.5rem 1.5rem;
+            border-radius: 40px;
+            font-size: 1.1rem;
+            font-weight: 700;
             display: flex;
             align-items: center;
-            gap: 16px;
-            padding: 16px;
-            background: var(--tag-bg);
-            border-radius: 20px;
-            margin: 20px 0;
+            gap: 0.5rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
 
-        .seller-avatar {
-            width: clamp(50px, 14vw, 60px);
-            height: clamp(50px, 14vw, 60px);
-            border-radius: 50%;
-            background: var(--accent);
+        .region-badge::before {
+            content: "📍";
+        }
+
+        .handle-section {
+            background: rgba(255,255,255,0.2);
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: clamp(24px, 7vw, 32px);
-        }
-
-        .seller-details {
-            flex: 1;
-        }
-
-        .seller-name {
-            font-weight: 600;
-            font-size: clamp(16px, 4.5vw, 18px);
-            margin-bottom: 4px;
-        }
-
-        .seller-rating {
-            color: #fbbf24;
-            font-size: clamp(14px, 4vw, 16px);
-        }
-
-        /* Bottom Nav - Mobile optimized */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            z-index: 300;
-            background: var(--surface);
-            border-top: 2px solid var(--border);
-            display: flex;
-            padding: 8px 0 20px;
+            gap: 1rem;
             backdrop-filter: blur(10px);
         }
 
-        .nav-item {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            padding: 8px 0;
+        .handle-section input {
+            background: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 30px;
+            font-size: 1rem;
+            width: 150px;
+        }
+
+        .handle-section button {
+            background: white;
+            color: #e62e2e;
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 30px;
+            font-weight: 600;
             cursor: pointer;
-            touch-action: manipulation;
+            transition: transform 0.2s;
         }
 
-        .nav-item:active { transform: scale(0.94); }
-
-        .nav-icon { 
-            font-size: clamp(24px, 7vw, 28px); 
+        .handle-section button:hover {
+            transform: scale(1.05);
         }
 
-        .nav-label {
-            font-size: clamp(10px, 3vw, 11px);
+        .region-selector {
+            background: white;
+            border-radius: 50px;
+            padding: 0.5rem;
+            display: inline-flex;
+            gap: 0.25rem;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .region-btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 40px;
+            border: none;
+            background: transparent;
             font-weight: 600;
-            text-transform: uppercase;
-            color: var(--ink-soft);
+            cursor: pointer;
+            transition: all 0.2s;
         }
 
-        .nav-item.active .nav-label { color: var(--accent); }
-
-        /* Toast */
-        .toast {
-            position: fixed;
-            bottom: 100px;
-            left: 16px;
-            right: 16px;
-            transform: none;
-            background: var(--ink);
+        .region-btn.active {
+            background: #e62e2e;
             color: white;
-            padding: 16px 24px;
-            border-radius: 60px;
-            font-size: clamp(15px, 4.5vw, 17px);
-            font-weight: 500;
-            z-index: 2000;
-            opacity: 0;
-            transition: opacity 0.3s;
-            pointer-events: none;
-            text-align: center;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
         }
 
-        .toast.show { opacity: 1; }
+        .region-btn.ottawa {
+            font-weight: 700;
+        }
 
-        /* Device detection banner (hidden by default) */
-        .mobile-banner {
-            background: var(--accent);
+        .current-region {
             color: white;
+            font-size: 0.95rem;
+            margin-top: 10px;
+            background: rgba(0,0,0,0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 30px;
+            display: inline-block;
+        }
+
+        .upload-section {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .upload-area {
+            border: 3px dashed #cbd5e0;
+            border-radius: 15px;
+            padding: 40px;
             text-align: center;
-            padding: 12px;
-            font-size: 14px;
-            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f7fafc;
+        }
+
+        .upload-area:hover, .upload-area.dragover {
+            border-color: #e62e2e;
+            background: #fef2f2;
+        }
+
+        .upload-area i {
+            font-size: 64px;
+            color: #e62e2e;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .upload-btn {
+            background: #e62e2e;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1em;
+            cursor: pointer;
+            margin: 20px 0 10px;
+            transition: transform 0.2s;
+        }
+
+        .upload-btn:hover {
+            transform: scale(1.05);
+            background: #c41e1e;
+        }
+
+        .file-info {
+            color: #718096;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 30px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #e2e8f0;
+            border-top-color: #e62e2e;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .results-section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .results-section.hidden {
             display: none;
         }
 
-        .mobile-banner.show { display: block; }
+        .result-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 20px;
+        }
 
-        /* Desktop specific tweaks */
-        @media (min-width: 1024px) {
-            .upload-area {
-                max-width: 600px;
-                margin-left: auto;
-                margin-right: auto;
+        .preview-container {
+            background: #f7fafc;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .preview-container img {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .analysis-container {
+            background: #f7fafc;
+            border-radius: 15px;
+            padding: 20px;
+        }
+
+        .category-badge {
+            display: inline-block;
+            background: #e62e2e;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            font-weight: 600;
+            margin: 10px 0;
+        }
+
+        .confidence-meter {
+            background: #e2e8f0;
+            height: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: #48bb78;
+            border-radius: 5px;
+            transition: width 0.5s;
+        }
+
+        .tag-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .tag {
+            background: #e2e8f0;
+            color: #4a5568;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.9em;
+        }
+
+        .description-box {
+            background: white;
+            border-left: 4px solid #e62e2e;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 10px 10px 0;
+            font-style: italic;
+            color: #4a5568;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: transform 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .action-btn.free {
+            background: #dcfce7;
+            color: #166534;
+            border: 2px solid #86efac;
+        }
+
+        .action-btn.sale {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 2px solid #fecaca;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .pile-nav {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 0.5rem;
+        }
+
+        .pile-tab {
+            padding: 0.75rem 2rem;
+            font-size: 1.25rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 40px 40px 0 0;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: white;
+        }
+
+        .pile-tab.active {
+            background: #e62e2e;
+            color: white;
+        }
+
+        .pile-tab .count {
+            background: rgba(255,255,255,0.2);
+            padding: 0.25rem 0.75rem;
+            border-radius: 40px;
+            font-size: 0.85rem;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+            border: 1px solid #e2e8f0;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+        }
+
+        .card.free {
+            border-left: 6px solid #22c55e;
+        }
+
+        .card.sale {
+            border-left: 6px solid #ef4444;
+        }
+
+        .card-image {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            background: #f1f5f9;
+        }
+
+        .card-content {
+            padding: 1rem;
+        }
+
+        .card-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .card-price {
+            font-weight: 700;
+        }
+
+        .card-price.free {
+            color: #22c55e;
+        }
+
+        .card-price.sale {
+            color: #ef4444;
+        }
+
+        .card-meta {
+            display: flex;
+            justify-content: space-between;
+            color: #64748b;
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+        }
+
+        .card-region {
+            background: #f1f5f9;
+            padding: 0.25rem 0.75rem;
+            border-radius: 40px;
+            font-size: 0.75rem;
+        }
+
+        .ml-badge {
+            background: #e2e8f0;
+            padding: 0.25rem 0.75rem;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            display: inline-block;
+            margin-top: 0.5rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem;
+            color: #94a3b8;
+            grid-column: 1 / -1;
+        }
+
+        .hosting-info {
+            background: #2d3748;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+            text-align: center;
+            font-size: 0.9em;
+        }
+
+        .hosting-info a {
+            color: #9ae6b4;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .hosting-info a:hover {
+            text-decoration: underline;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #2d3748;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            .result-grid {
+                grid-template-columns: 1fr;
             }
             
-            .recent-scroll {
-                justify-content: center;
+            h1 {
+                font-size: 2em;
+            }
+
+            .pile-nav {
+                flex-direction: column;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Mobile Detection Banner (shows when mobile detected) -->
-    <div class="mobile-banner" id="mobileBanner">
-        📱 Mobile mode active - Optimized for touch
-    </div>
-
-    <!-- HOME VIEW -->
-    <div class="view visible" id="homeView">
-        <div class="wordmark">Snap<span>Drop</span></div>
-        <div class="tagline">Snap a photo, AI does the rest</div>
-
-        <!-- BIG UPLOAD AREA - Easy for thumbs -->
-        <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
-            <div class="upload-icon">📸</div>
-            <h3>I have something to sell</h3>
-            <p>Tap to upload a photo</p>
-            <button class="upload-btn" onclick="event.stopPropagation(); document.getElementById('fileInput').click()">
-                Choose Image
-            </button>
-            <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="handleFileSelect(this.files[0])">
-            <div style="color: var(--ink-soft); font-size: 13px; margin-top: 10px;" id="fileInfo"></div>
-        </div>
-
-        <!-- Loading -->
-        <div class="loading" id="loading">
-            <div class="spinner"></div>
-            <p>AI is analyzing your item...</p>
-            <p style="color: var(--ink-soft);">Identifying category</p>
-        </div>
-
-        <!-- AI Result -->
-        <div class="ai-result" id="aiResult">
-            <img class="result-image" id="previewImage" src="" alt="Preview">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
-                <span class="ai-category" id="categoryDisplay">Loading...</span>
-                <span style="color: var(--ink-soft); font-size: clamp(14px, 4vw, 16px);" id="confidenceDisplay">90%</span>
+    <div class="container">
+        <header>
+            <h1>
+                📸 FREEPILE 
+                <span class="region-badge">Ottawa</span>
+            </h1>
+            <div class="handle-section">
+                <input type="text" id="handleInput" placeholder="your handle" maxlength="20">
+                <button id="saveHandle">save</button>
             </div>
-            
-            <div class="ai-tags" id="tagContainer"></div>
-            
-            <div class="ai-description" id="descriptionBox">
-                AI is generating description...
+        </header>
+
+        <!-- Region Selector (Mock) -->
+        <div style="text-align: center;">
+            <div class="region-selector">
+                <button class="region-btn ottawa active" id="regionOttawa">📍 Ottawa</button>
+                <button class="region-btn" id="regionMontreal">Montreal</button>
+                <button class="region-btn" id="regionToronto">Toronto</button>
+                <button class="region-btn" id="regionVancouver">Vancouver</button>
             </div>
-
-            <button class="add-to-pile-btn" onclick="addToPile()">
-                <span>📦</span> Add to Marketplace
-            </button>
-        </div>
-
-        <!-- Recent Items - Horizontal scroll -->
-        <div class="recent-section">
-            <h3>Your Recent Items</h3>
-            <div class="recent-scroll" id="recentScroll"></div>
-        </div>
-    </div>
-
-    <!-- TABLE VIEW -->
-    <div class="view hidden-right" id="tableView">
-        <div class="felt-surface"></div>
-        <div class="felt-dots"></div>
-
-        <div class="table-header">
-            <button class="back-btn" onclick="goTo('home')">←</button>
-            <div>
-                <div class="table-title">The Table</div>
-                <div class="table-subtitle">Tap any card</div>
+            <div class="current-region" id="currentRegionDisplay">
+                📍 viewing Ottawa · your home pile
             </div>
         </div>
 
-        <div class="table-surface" id="tableSurface"></div>
-
-        <!-- Scrollable category pills -->
-        <div class="table-cat-bar" id="tableCatBar">
-            <div class="table-cat-pill active" onclick="filterTable('all')">All Items</div>
-            <div class="table-cat-pill" onclick="filterTable('kitchen')">🍳 Kitchen</div>
-            <div class="table-cat-pill" onclick="filterTable('tech')">📱 Tech</div>
-            <div class="table-cat-pill" onclick="filterTable('bedroom')">🛏️ Bedroom</div>
-            <div class="table-cat-pill" onclick="filterTable('outdoors')">🌿 Outdoors</div>
-            <div class="table-cat-pill" onclick="filterTable('kids')">🧸 Kids</div>
-            <div class="table-cat-pill" onclick="filterTable('clothes')">👗 Clothes</div>
-        </div>
-    </div>
-
-    <!-- DETAIL MODAL -->
-    <div class="detail-modal" id="detailModal">
-        <div class="detail-header">
-            <button class="close-detail" onclick="closeDetail()">✕</button>
-            <div class="detail-title" id="detailTitle">Item Details</div>
-        </div>
-        
-        <img class="detail-image" id="detailImage" src="" alt="Item">
-        
-        <div class="detail-content">
-            <span class="detail-category" id="detailCategory">Category</span>
-            
-            <div class="detail-price" id="detailPrice">
-                $45 <small>or best offer</small>
+        <!-- Upload Section -->
+        <div class="upload-section">
+            <div class="upload-area" id="uploadArea">
+                <i>📤</i>
+                <h3>Drag & Drop or Click to Upload</h3>
+                <p>One photo · ML will identify it · Ottawa only</p>
+                <button class="upload-btn" onclick="event.stopPropagation(); document.getElementById('fileInput').click()">
+                    Choose Image
+                </button>
+                <input type="file" id="fileInput" accept="image/*" style="display: none;">
+                <div class="file-info" id="fileInfo"></div>
             </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p id="loadingStatus">Analyzing your image...</p>
+                <p style="color: #718096; font-size: 0.9em;">Using AI to identify and categorize</p>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div class="results-section hidden" id="resultsSection">
+            <h2 style="margin-bottom: 20px; color: #2d3748;">✨ AI Analysis</h2>
             
-            <div class="detail-meta">
-                <div class="meta-item">
-                    <span class="meta-label">Location</span>
-                    <span class="meta-value" id="detailLocation">Ottawa</span>
+            <div class="result-grid">
+                <div class="preview-container">
+                    <img id="previewImage" src="" alt="Uploaded preview">
                 </div>
-                <div class="meta-item">
-                    <span class="meta-label">Posted</span>
-                    <span class="meta-value" id="detailTime">2h ago</span>
-                </div>
-                <div class="meta-item">
-                    <span class="meta-label">Views</span>
-                    <span class="meta-value" id="detailViews">234</span>
-                </div>
-            </div>
-            
-            <div class="detail-description" id="detailDescription">
-                Item description goes here...
-            </div>
-            
-            <div class="detail-tags" id="detailTags" style="display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0;"></div>
-            
-            <!-- BIG ACTION BUTTONS -->
-            <div class="action-grid">
-                <button class="action-btn offer" onclick="handleAction('offer')">
-                    <span class="emoji">💸</span>
-                    Make Offer
-                </button>
-                <button class="action-btn save" onclick="handleAction('save')">
-                    <span class="emoji">🔖</span>
-                    Keep Later
-                </button>
-                <button class="action-btn ask" onclick="handleAction('ask')">
-                    <span class="emoji">💬</span>
-                    Ask Details
-                </button>
-                <button class="action-btn report" onclick="handleAction('report')">
-                    <span class="emoji">🚩</span>
-                    Report
-                </button>
-            </div>
-            
-            <!-- Seller Info -->
-            <div class="seller-info">
-                <div class="seller-avatar">👤</div>
-                <div class="seller-details">
-                    <div class="seller-name" id="detailSeller">Alex from Ottawa</div>
-                    <div class="seller-rating">★★★★★ (24)</div>
+
+                <div class="analysis-container">
+                    <div style="margin-bottom: 20px;">
+                        <span style="color: #718096;">Category</span>
+                        <div class="category-badge" id="categoryDisplay">Loading...</div>
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <span style="color: #718096;">Confidence</span>
+                        <div class="confidence-meter">
+                            <div class="confidence-fill" id="confidenceFill" style="width: 0%"></div>
+                        </div>
+                        <span id="confidenceValue">0%</span>
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <span style="color: #718096;">Tags</span>
+                        <div class="tag-container" id="tagContainer"></div>
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <span style="color: #718096;">Description</span>
+                        <div class="description-box" id="descriptionBox">
+                            Analyzing image content...
+                        </div>
+                    </div>
+
+                    <div style="font-size:0.85rem; color:#64748b; margin:0.5rem 0;">
+                        ✏️ you can edit the description below
+                    </div>
+                    
+                    <textarea id="editableDescription" rows="3" style="width:100%; padding:0.75rem; border:1px solid #cbd5e1; border-radius:8px; margin-bottom:1rem;">Loading...</textarea>
+
+                    <div class="action-buttons">
+                        <button class="action-btn free" id="dropFree">
+                            🆓 drop in FREE pile
+                        </button>
+                        <button class="action-btn sale" id="dropSale">
+                            💰 drop in FOR SALE pile
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
+
+        <!-- Pile Navigation -->
+        <div class="pile-nav">
+            <div class="pile-tab free active" id="tabFree">
+                🆓 FREE pile <span class="count" id="freeCount">0</span>
+            </div>
+            <div class="pile-tab sale" id="tabSale">
+                💰 FOR SALE pile <span class="count" id="saleCount">0</span>
+            </div>
+        </div>
+
+        <!-- Cards Grid -->
+        <div class="cards-grid" id="cardsGrid"></div>
+
+        <!-- Hosting Info -->
+        <div class="hosting-info">
+            🚀 <strong>Free Hosting:</strong> Deploy on <a onclick="showHostingOptions()">GitHub Pages</a> • 
+            <a onclick="showHostingOptions()">Netlify</a> • 
+            <a onclick="showHostingOptions()">Vercel</a>
+            <br>
+            <small>No credit card required · Ottawa's free pile</small>
+        </div>
     </div>
 
-    <!-- Bottom Nav -->
-    <div class="bottom-nav">
-        <div class="nav-item active" onclick="goTo('home')">
-            <div class="nav-icon">🏠</div>
-            <div class="nav-label">Sell</div>
-        </div>
-        <div class="nav-item" onclick="goTo('table')">
-            <div class="nav-icon">🗃️</div>
-            <div class="nav-label">Browse</div>
-        </div>
-    </div>
-
-    <!-- Toast -->
-    <div class="toast" id="toast"></div>
+    <div class="toast" id="toast">✨ Item added to pile!</div>
 
     <script>
-        // =============================================
-        // MOBILE DETECTION
-        // =============================================
-        
-        function detectMobile() {
-            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
-            
-            if (isMobile) {
-                document.body.classList.add('mobile-device');
-                document.getElementById('mobileBanner').classList.add('show');
-                console.log('📱 Mobile mode activated');
-                
-                // Adjust for mobile
-                document.documentElement.style.setProperty('--tap-size', '44px');
+        // ==================== CONFIG ====================
+        const HOME_REGION = 'ottawa';
+        const HF_TOKEN = 'hf_YOUR_TOKEN_HERE'; // Get from huggingface.co/settings/tokens
+
+        // ==================== STATE ====================
+        let currentHandle = localStorage.getItem('freepile_handle') || '';
+        let deviceId = localStorage.getItem('freepile_device_id');
+        let currentRegion = localStorage.getItem('freepile_current_region') || HOME_REGION;
+        let currentPile = 'free';
+        let listings = JSON.parse(localStorage.getItem('freepile_listings') || '[]');
+        let currentAnalyzedItem = null;
+
+        // Category mapping
+        const categoryMap = {
+            'food': 'kitchen', 'furniture': 'bedroom', 'bed': 'bedroom',
+            'sofa': 'bedroom', 'chair': 'outdoors', 'table': 'kitchen',
+            'laptop': 'tech', 'phone': 'tech', 'computer': 'tech',
+            'tv': 'tech', 'bicycle': 'outdoors', 'bike': 'outdoors',
+            'car': 'outdoors', 'dog': 'kids', 'cat': 'kids',
+            'toy': 'kids', 'ball': 'sports', 'sports': 'sports',
+            'shirt': 'clothes', 'pants': 'clothes', 'dress': 'clothes',
+            'jacket': 'clothes', 'shoe': 'clothes'
+        };
+
+        // ==================== INIT ====================
+        if (!deviceId) {
+            deviceId = 'device_' + Math.random().toString(36).substring(2, 15);
+            localStorage.setItem('freepile_device_id', deviceId);
+        }
+
+        document.getElementById('handleInput').value = currentHandle;
+        if (currentHandle) {
+            document.getElementById('saveHandle').textContent = '✓';
+        }
+
+        updateRegionDisplay();
+        updateCounts();
+        renderGrid();
+
+        // ==================== HANDLE ====================
+        document.getElementById('saveHandle').addEventListener('click', () => {
+            const handle = document.getElementById('handleInput').value.trim();
+            if (handle && handle.match(/^[a-zA-Z0-9_]{3,20}$/)) {
+                currentHandle = handle;
+                localStorage.setItem('freepile_handle', handle);
+                document.getElementById('saveHandle').textContent = '✓';
+                showToast(`Handle saved: ${handle}`);
             } else {
-                console.log('💻 Desktop mode');
+                alert('handle must be 3-20 chars: letters, numbers, underscore');
             }
+        });
+
+        // ==================== REGION SELECTOR ====================
+        document.getElementById('regionOttawa').addEventListener('click', () => setRegion('ottawa'));
+        document.getElementById('regionMontreal').addEventListener('click', () => setRegion('montreal'));
+        document.getElementById('regionToronto').addEventListener('click', () => setRegion('toronto'));
+        document.getElementById('regionVancouver').addEventListener('click', () => setRegion('vancouver'));
+
+        function setRegion(region) {
+            currentRegion = region;
+            localStorage.setItem('freepile_current_region', region);
             
-            return isMobile;
+            document.querySelectorAll('.region-btn').forEach(btn => btn.classList.remove('active'));
+            if (region === 'ottawa') document.getElementById('regionOttawa').classList.add('active');
+            if (region === 'montreal') document.getElementById('regionMontreal').classList.add('active');
+            if (region === 'toronto') document.getElementById('regionToronto').classList.add('active');
+            if (region === 'vancouver') document.getElementById('regionVancouver').classList.add('active');
+            
+            updateRegionDisplay();
+            renderGrid();
         }
 
-        // =============================================
-        // DATA STORAGE
-        // =============================================
-        
-        let marketplaceItems = JSON.parse(localStorage.getItem('marketplaceItems')) || [
-            { 
-                id: 1, 
-                emoji: '🪴', 
-                category: 'outdoors', 
-                catLabel: 'Outdoors', 
-                title: 'Fiddle Leaf Fig', 
-                location: 'Westboro', 
-                time: '2h ago', 
-                interest: 3,
-                price: 35,
-                seller: 'Mike',
-                rating: 4.8,
-                views: 156,
-                description: 'Healthy fiddle leaf fig plant, about 4 feet tall. Needs a new home as I am moving. Comes with ceramic pot.',
-                tags: ['plant', 'indoor', 'large']
-            },
-            { 
-                id: 2, 
-                emoji: '📱', 
-                category: 'tech', 
-                catLabel: 'Tech', 
-                title: 'iPad Air', 
-                location: 'Barrhaven', 
-                time: '30m ago', 
-                interest: 18,
-                price: 450,
-                seller: 'Sarah',
-                rating: 5.0,
-                views: 342,
-                description: 'iPad Air 4th generation, 64GB, Space Gray. Includes case and charger.',
-                tags: ['apple', 'tablet', 'like new']
-            },
-            { 
-                id: 3, 
-                emoji: '🍳', 
-                category: 'kitchen', 
-                catLabel: 'Kitchen', 
-                title: 'Le Creuset Pot', 
-                location: 'Hunt Club', 
-                time: '3h ago', 
-                interest: 9,
-                price: 120,
-                seller: 'James',
-                rating: 4.9,
-                views: 89,
-                description: 'Le Creuset Dutch oven, flame orange color. 5.5qt, perfect for soups and stews.',
-                tags: ['cast iron', 'cooking', 'orange']
-            },
-        ];
-
-        let nextId = marketplaceItems.length + 1;
-        let currentView = 'home';
-        let tableCards = [];
-        let currentFilter = 'all';
-        let pendingAIItem = null;
-        let dragStartTime = 0;
-        let dragStartPos = { x: 0, y: 0 };
-        let draggingCard = null;
-        let dragOffX = 0, dragOffY = 0;
-        const clickThreshold = 5;
-
-        // Initialize
-        detectMobile();
-        updateRecentPreview();
-
-        // =============================================
-        // NAVIGATION
-        // =============================================
-        
-        function goTo(view) {
-            document.getElementById('homeView').className = view === 'home' ? 'view visible' : 'view hidden-left';
-            document.getElementById('tableView').className = view === 'table' ? 'view visible' : 'view hidden-right';
-            
-            document.querySelectorAll('.nav-item').forEach((item, index) => {
-                item.classList.toggle('active', (index === 0 && view === 'home') || (index === 1 && view === 'table'));
-            });
-
-            currentView = view;
-
-            if (view === 'table') {
-                setTimeout(() => buildTableCards(), 100);
+        function updateRegionDisplay() {
+            const display = document.getElementById('currentRegionDisplay');
+            if (currentRegion === HOME_REGION) {
+                display.innerHTML = `📍 viewing <strong>Ottawa</strong> · your home pile`;
+            } else {
+                display.innerHTML = `📍 viewing <strong>${currentRegion}</strong> · travel mode`;
             }
         }
 
-        // =============================================
-        // AI UPLOAD (simulated)
-        // =============================================
-        
+        // ==================== UPLOAD ====================
         const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+
+        uploadArea.addEventListener('click', () => fileInput.click());
         
         uploadArea.addEventListener('dragover', (e) => {
             e.preventDefault();
@@ -1037,13 +745,24 @@
             const file = e.dataTransfer.files[0];
             if (file && file.type.startsWith('image/')) {
                 handleFileSelect(file);
+            } else {
+                showToast('Please upload an image file');
             }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files[0]) handleFileSelect(e.target.files[0]);
         });
 
         async function handleFileSelect(file) {
             if (!file) return;
             
-            document.getElementById('fileInfo').textContent = `Selected: ${file.name}`;
+            if (file.size > 10 * 1024 * 1024) {
+                showToast('File too large (max 10MB)');
+                return;
+            }
+
+            document.getElementById('fileInfo').textContent = `Selected: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
             
             const reader = new FileReader();
             reader.onload = (e) => {
@@ -1052,319 +771,347 @@
             reader.readAsDataURL(file);
             
             document.getElementById('loading').classList.add('show');
-            document.getElementById('aiResult').classList.remove('show');
+            document.getElementById('resultsSection').classList.add('hidden');
             
-            setTimeout(() => {
-                const analysis = simulateAIAnalysis(file);
-                displayResults(analysis);
-            }, 2000);
+            await analyzeImage(file);
         }
 
-        function simulateAIAnalysis(file) {
-            const categories = ['kitchen', 'tech', 'bedroom', 'outdoors', 'kids', 'clothes', 'sports'];
-            const category = categories[Math.floor(Math.random() * categories.length)];
-            
-            const tags = {
-                kitchen: ['pan', 'cooking', 'utensil', 'stainless'],
-                tech: ['electronics', 'gadget', 'portable'],
-                bedroom: ['furniture', 'bedding', 'lamp'],
-                outdoors: ['garden', 'plant', 'tool'],
-                kids: ['toy', 'play', 'educational'],
-                clothes: ['fashion', 'cotton', 'casual'],
-                sports: ['fitness', 'exercise', 'equipment']
-            };
+        // ==================== ML ANALYSIS ====================
+        async function analyzeImage(file) {
+            try {
+                document.getElementById('loadingStatus').textContent = 'Contacting AI service...';
+                
+                // Try Hugging Face first
+                let result = await analyzeWithHuggingFace(file);
+                
+                if (!result) {
+                    // Fallback to simulation
+                    result = simulateAnalysis(file);
+                }
+                
+                displayResults(result);
+                
+            } catch (error) {
+                console.error('AI error:', error);
+                const result = simulateAnalysis(file);
+                displayResults(result);
+                showToast('Using demo mode (AI service unavailable)');
+            } finally {
+                document.getElementById('loading').classList.remove('show');
+                document.getElementById('resultsSection').classList.remove('hidden');
+            }
+        }
 
+        async function analyzeWithHuggingFace(file) {
+            try {
+                const base64 = await fileToBase64(file);
+                
+                const response = await fetch(
+                    "https://api-inference.huggingface.co/models/google/vit-base-patch16-224",
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${HF_TOKEN}`
+                        },
+                        body: JSON.stringify({ inputs: base64 })
+                    }
+                );
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    return parseHuggingFaceResponse(data);
+                }
+                return null;
+            } catch {
+                return null;
+            }
+        }
+
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result.split(',')[1]);
+                reader.onerror = reject;
+            });
+        }
+
+        function parseHuggingFaceResponse(data) {
+            let labels = [], scores = [];
+            
+            if (Array.isArray(data)) {
+                if (data[0] && data[0].label) {
+                    labels = data.map(item => item.label);
+                    scores = data.map(item => item.score);
+                } else if (data[0] && Array.isArray(data[0])) {
+                    labels = data[0].map(item => item.label || item);
+                    scores = data[0].map(item => item.score || 0.5);
+                }
+            }
+            
+            return { labels: labels.slice(0, 5), scores: scores.slice(0, 5) };
+        }
+
+        function simulateAnalysis(file) {
+            const name = file.name.toLowerCase();
+            const categories = [
+                { cat: 'kitchen', tags: ['food', 'cooking', 'utensil', 'kitchenware'] },
+                { cat: 'tech', tags: ['electronics', 'device', 'gadget', 'computer'] },
+                { cat: 'bedroom', tags: ['furniture', 'bed', 'pillow', 'lamp'] },
+                { cat: 'outdoors', tags: ['nature', 'plant', 'garden', 'outside'] },
+                { cat: 'kids', tags: ['toy', 'child', 'play', 'game'] },
+                { cat: 'clothes', tags: ['fashion', 'clothing', 'apparel', 'wear'] },
+                { cat: 'sports', tags: ['sport', 'fitness', 'exercise', 'ball'] }
+            ];
+            
+            const hash = name.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
+            const catIndex = hash % categories.length;
+            const category = categories[catIndex];
+            const confidence = 70 + (hash % 29);
+            
+            const descriptions = [
+                `A ${category.tags[0]} item from Ottawa. Looks clean and ready for a new home.`,
+                `This ${category.cat} item appears to be in good condition. Perfect for someone in Ottawa.`,
+                `Nice ${category.tags[1]}! Would be great for the ${category.cat} section.`
+            ];
+            
             return {
-                category: category,
-                tags: tags[category],
-                description: `A well-maintained ${category} item. Perfect for someone looking for quality.`,
-                confidence: 75 + Math.floor(Math.random() * 20),
-                emoji: getEmojiForCategory(category)
+                labels: category.tags,
+                scores: [confidence/100, 0.8, 0.7, 0.6],
+                primaryCategory: category.cat,
+                primaryConfidence: confidence,
+                description: descriptions[hash % descriptions.length]
             };
-        }
-
-        function getEmojiForCategory(cat) {
-            const emojis = {
-                kitchen: '🍳',
-                tech: '📱',
-                bedroom: '🛏️',
-                outdoors: '🌿',
-                kids: '🧸',
-                clothes: '👗',
-                sports: '⚽'
-            };
-            return emojis[cat] || '📦';
         }
 
         function displayResults(analysis) {
-            document.getElementById('loading').classList.remove('show');
+            let labels = analysis.labels || [];
+            let scores = analysis.scores || [];
+            let primaryLabel = labels[0] || 'item';
+            let primaryScore = scores[0] || 0.7;
             
-            document.getElementById('categoryDisplay').textContent = analysis.category.charAt(0).toUpperCase() + analysis.category.slice(1);
-            document.getElementById('confidenceDisplay').textContent = analysis.confidence + '%';
+            const category = mapToCategory(primaryLabel);
+            
+            document.getElementById('categoryDisplay').textContent = formatCategory(category);
+            document.getElementById('confidenceFill').style.width = `${primaryScore * 100}%`;
+            document.getElementById('confidenceValue').textContent = `${Math.round(primaryScore * 100)}%`;
             
             const tagContainer = document.getElementById('tagContainer');
             tagContainer.innerHTML = '';
-            analysis.tags.slice(0, 3).forEach(tag => {
-                const tagEl = document.createElement('span');
-                tagEl.className = 'ai-tag';
-                tagEl.textContent = tag;
-                tagContainer.appendChild(tagEl);
+            
+            labels.slice(0, 5).forEach(label => {
+                if (label) {
+                    const tag = document.createElement('span');
+                    tag.className = 'tag';
+                    tag.textContent = formatLabel(label);
+                    tagContainer.appendChild(tag);
+                }
             });
             
-            document.getElementById('descriptionBox').textContent = analysis.description;
+            const catTag = document.createElement('span');
+            catTag.className = 'tag';
+            catTag.style.background = '#e62e2e';
+            catTag.style.color = 'white';
+            catTag.textContent = category;
+            tagContainer.appendChild(catTag);
             
-            pendingAIItem = {
-                ...analysis,
+            const description = analysis.description || generateDescription(category, labels);
+            document.getElementById('descriptionBox').textContent = description;
+            document.getElementById('editableDescription').value = description;
+            
+            currentAnalyzedItem = {
+                category: category,
+                tags: labels.slice(0, 5),
+                description: description,
+                confidence: primaryScore,
                 imageUrl: document.getElementById('previewImage').src,
+                timestamp: new Date().toISOString()
             };
-            
-            document.getElementById('aiResult').classList.add('show');
         }
 
-        function addToPile() {
-            if (!pendingAIItem) {
-                showToast('No item to add');
+        function mapToCategory(label) {
+            if (!label) return 'tech';
+            label = label.toLowerCase();
+            
+            for (const [key, value] of Object.entries(categoryMap)) {
+                if (label.includes(key)) return value;
+            }
+            
+            if (label.includes('food') || label.includes('kitchen')) return 'kitchen';
+            if (label.includes('bed') || label.includes('sofa')) return 'bedroom';
+            if (label.includes('phone') || label.includes('computer')) return 'tech';
+            if (label.includes('outdoor') || label.includes('nature')) return 'outdoors';
+            if (label.includes('toy') || label.includes('baby')) return 'kids';
+            if (label.includes('shirt') || label.includes('pants')) return 'clothes';
+            if (label.includes('ball') || label.includes('sport')) return 'sports';
+            
+            return 'tech';
+        }
+
+        function formatCategory(cat) {
+            const map = {
+                'kitchen': '🍳 Kitchen', 'tech': '📱 Tech', 'bedroom': '🛏️ Bedroom',
+                'outdoors': '🌿 Outdoors', 'kids': '🧸 Kids', 'clothes': '👗 Clothes',
+                'sports': '⚽ Sports', 'summer': '☀️ Summer'
+            };
+            return map[cat] || '📦 ' + cat;
+        }
+
+        function formatLabel(label) {
+            return label.split('_').map(word => 
+                word.charAt(0).toUpperCase() + word.slice(1)
+            ).join(' ');
+        }
+
+        function generateDescription(category, labels) {
+            const primary = labels[0] || 'item';
+            return `This ${formatLabel(primary)} is available in Ottawa. It's in good condition and ready for a new home. Perfect for the ${category} section.`;
+        }
+
+        // ==================== DROP INTO PILES ====================
+        document.getElementById('dropFree').addEventListener('click', () => {
+            dropIntoPile('free');
+        });
+
+        document.getElementById('dropSale').addEventListener('click', () => {
+            const price = prompt('Enter price (in $):', '20');
+            if (price === null) return;
+            const priceNum = parseFloat(price);
+            if (isNaN(priceNum) || priceNum <= 0) {
+                alert('please enter a valid price');
+                return;
+            }
+            dropIntoPile('sale', priceNum);
+        });
+
+        function dropIntoPile(type, price = null) {
+            if (!currentHandle) {
+                alert('please set a handle first');
                 return;
             }
 
-            const newItem = {
-                id: nextId++,
-                emoji: pendingAIItem.emoji,
-                category: pendingAIItem.category,
-                catLabel: pendingAIItem.category.charAt(0).toUpperCase() + pendingAIItem.category.slice(1),
-                title: pendingAIItem.tags[0] + ' item',
-                location: 'Ottawa',
-                time: 'Just now',
-                interest: 0,
-                price: Math.floor(Math.random() * 100) + 20,
-                seller: 'You',
-                rating: 5.0,
-                views: 1,
-                imageUrl: pendingAIItem.imageUrl,
-                description: pendingAIItem.description,
-                tags: pendingAIItem.tags
+            if (!currentAnalyzedItem) {
+                alert('take a photo first');
+                return;
+            }
+
+            if (currentRegion !== HOME_REGION) {
+                alert('you can only post in Ottawa (your home pile)');
+                return;
+            }
+
+            const customDescription = document.getElementById('editableDescription').value;
+
+            const listing = {
+                id: 'listing_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
+                handle: currentHandle,
+                type: type,
+                title: document.getElementById('categoryDisplay').textContent,
+                description: customDescription,
+                tags: currentAnalyzedItem.tags || [],
+                price: type === 'sale' ? price : null,
+                image: currentAnalyzedItem.imageUrl,
+                mlGenerated: true,
+                timestamp: Date.now(),
+                region: HOME_REGION
             };
 
-            marketplaceItems.unshift(newItem);
-            localStorage.setItem('marketplaceItems', JSON.stringify(marketplaceItems));
-            
-            document.getElementById('aiResult').classList.remove('show');
-            document.getElementById('fileInfo').textContent = '';
+            listings.push(listing);
+            localStorage.setItem('freepile_listings', JSON.stringify(listings));
+
+            document.getElementById('resultsSection').classList.add('hidden');
             document.getElementById('fileInput').value = '';
+            document.getElementById('fileInfo').textContent = '';
+            currentAnalyzedItem = null;
             
-            showToast('✅ Item added!');
-            updateRecentPreview();
+            updateCounts();
+            renderGrid();
             
-            if (currentView === 'table') {
-                buildTableCards();
+            showToast(`✅ dropped in ${type === 'free' ? 'FREE' : 'FOR SALE'} pile · Ottawa`);
+        }
+
+        // ==================== PILE NAVIGATION ====================
+        document.getElementById('tabFree').addEventListener('click', () => {
+            currentPile = 'free';
+            document.getElementById('tabFree').classList.add('active');
+            document.getElementById('tabSale').classList.remove('active');
+            renderGrid();
+        });
+
+        document.getElementById('tabSale').addEventListener('click', () => {
+            currentPile = 'sale';
+            document.getElementById('tabSale').classList.add('active');
+            document.getElementById('tabFree').classList.remove('active');
+            renderGrid();
+        });
+
+        // ==================== RENDER GRID ====================
+        function updateCounts() {
+            const ottawaListings = listings.filter(l => l.region === HOME_REGION);
+            const freeCount = ottawaListings.filter(l => l.type === 'free').length;
+            const saleCount = ottawaListings.filter(l => l.type === 'sale').length;
+            document.getElementById('freeCount').textContent = freeCount;
+            document.getElementById('saleCount').textContent = saleCount;
+        }
+
+        function renderGrid() {
+            const grid = document.getElementById('cardsGrid');
+            
+            const filtered = listings.filter(l => 
+                l.region === currentRegion && l.type === currentPile
+            );
+            
+            if (filtered.length === 0) {
+                grid.innerHTML = `<div class="empty-state">
+                    ✨ ${currentPile === 'free' ? 'FREE' : 'FOR SALE'} pile in ${currentRegion} is empty
+                    ${currentRegion === HOME_REGION ? '· snap something!' : '· try your home pile'}
+                </div>`;
+                return;
             }
-            
-            pendingAIItem = null;
-        }
 
-        // =============================================
-        // TABLE VIEW
-        // =============================================
-        
-        function buildTableCards() {
-            const surface = document.getElementById('tableSurface');
-            const w = surface.offsetWidth || window.innerWidth;
-            const h = surface.offsetHeight || window.innerHeight;
-
-            const itemsToShow = currentFilter === 'all' 
-                ? marketplaceItems 
-                : marketplaceItems.filter(item => item.category === currentFilter);
-
-            tableCards = itemsToShow.map((item, i) => {
-                const x = 20 + Math.random() * (w - 160);
-                const y = 80 + Math.random() * (h - 240);
-                const rot = (Math.random() - 0.5) * 15;
-                return { ...item, x, y, rot, z: i + 1 };
-            });
-
-            renderTableCards();
-        }
-
-        function renderTableCards() {
-            const surface = document.getElementById('tableSurface');
-            
-            surface.innerHTML = tableCards.map(card => `
-                <div class="table-card"
-                     id="tc_${card.id}"
-                     style="left:${card.x}px; top:${card.y}px; transform:rotate(${card.rot}deg); z-index:${card.z};"
-                     onmousedown="startDrag(event,${card.id})"
-                     onmouseup="handleCardClick(event,${card.id})"
-                     ontouchstart="startDrag(event,${card.id})"
-                     ontouchend="handleCardClick(event,${card.id})">
-                    ${card.imageUrl ? 
-                        `<img class="card-photo" src="${card.imageUrl}" alt="Item">` : 
-                        `<div class="card-photo" style="display:flex;align-items:center;justify-content:center;font-size:42px;">${card.emoji}</div>`
-                    }
-                    <div class="card-body">
-                        <div class="card-category">${card.catLabel}</div>
-                        <div class="card-desc">${card.title}</div>
-                        <div class="card-footer">
-                            <div class="card-location">📍${card.location}</div>
+            grid.innerHTML = filtered.map(listing => `
+                <div class="card ${listing.type}">
+                    <img src="${listing.image}" class="card-image" alt="${listing.title}">
+                    <div class="card-content">
+                        <div class="card-title">
+                            ${listing.title}
+                            <span class="card-price ${listing.type}">
+                                ${listing.type === 'free' ? 'FREE' : '$' + listing.price}
+                            </span>
                         </div>
+                        <div class="card-meta">
+                            <span>@${listing.handle}</span>
+                            <span class="card-region">📍 ${listing.region}</span>
+                        </div>
+                        <div class="ml-badge">🤖 ML-suggested</div>
                     </div>
                 </div>
             `).join('');
         }
 
-        function filterTable(cat) {
-            currentFilter = cat;
-            document.querySelectorAll('.table-cat-pill').forEach(p => p.classList.remove('active'));
-            event.target.classList.add('active');
-            buildTableCards();
+        // ==================== UTILITIES ====================
+        let toastTimeout;
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
         }
 
-        // =============================================
-        // DRAG HANDLING
-        // =============================================
-        
-        function startDrag(e, id) {
-            e.preventDefault();
-            const pos = getPos(e);
-            
-            dragStartTime = Date.now();
-            dragStartPos = { x: pos.x, y: pos.y };
-            
-            const el = document.getElementById('tc_' + id);
-            if (!el) return;
-
-            draggingCard = { id, el };
-            const rect = el.getBoundingClientRect();
-            dragOffX = pos.x - rect.left;
-            dragOffY = pos.y - rect.top;
-
-            el.classList.add('dragging');
+        function showHostingOptions() {
+            alert('✨ FREE HOSTING:\n\nGitHub Pages: username.github.io\nNetlify: drag & drop\nVercel: connect Git repo\n\nAll free with SSL!');
         }
 
-        document.addEventListener('mousemove', (e) => {
-            if (!draggingCard) return;
-            
-            const pos = getPos(e);
-            const dx = Math.abs(pos.x - dragStartPos.x);
-            const dy = Math.abs(pos.y - dragStartPos.y);
-            
-            if (dx > clickThreshold || dy > clickThreshold) {
-                e.preventDefault();
+        // Prevent default drag/drop on document
+        document.addEventListener('dragover', (e) => e.preventDefault());
+        document.addEventListener('drop', (e) => e.preventDefault());
 
-                const surface = document.getElementById('tableSurface');
-                const rect = surface.getBoundingClientRect();
-                
-                const x = pos.x - rect.left - dragOffX;
-                const y = pos.y - rect.top - dragOffY;
-                
-                draggingCard.el.style.left = x + 'px';
-                draggingCard.el.style.top = y + 'px';
-            }
-        });
-
-        document.addEventListener('mouseup', () => {
-            if (draggingCard) {
-                draggingCard.el.classList.remove('dragging');
-                draggingCard = null;
-            }
-        });
-
-        function handleCardClick(e, id) {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            const pos = getPos(e);
-            const dx = Math.abs(pos.x - dragStartPos.x);
-            const dy = Math.abs(pos.y - dragStartPos.y);
-            const timeElapsed = Date.now() - dragStartTime;
-            
-            if (timeElapsed < 200 && dx < clickThreshold && dy < clickThreshold) {
-                const item = marketplaceItems.find(i => i.id === id);
-                if (item) {
-                    showItemDetail(item);
-                }
-            }
-        }
-
-        function getPos(e) {
-            if (e.touches) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
-            return { x: e.clientX, y: e.clientY };
-        }
-
-        // =============================================
-        // DETAIL MODAL
-        // =============================================
-        
-        function showItemDetail(item) {
-            document.getElementById('detailTitle').textContent = item.title;
-            document.getElementById('detailImage').src = item.imageUrl || '';
-            document.getElementById('detailCategory').textContent = item.catLabel;
-            document.getElementById('detailPrice').innerHTML = `$${item.price || 45} <small>or best offer</small>`;
-            document.getElementById('detailLocation').textContent = item.location;
-            document.getElementById('detailTime').textContent = item.time;
-            document.getElementById('detailViews').textContent = item.views || Math.floor(Math.random() * 200) + 50;
-            document.getElementById('detailDescription').textContent = item.description || 'No description provided.';
-            document.getElementById('detailSeller').textContent = item.seller || 'Anonymous';
-            
-            const tagContainer = document.getElementById('detailTags');
-            tagContainer.innerHTML = '';
-            (item.tags || ['good condition']).slice(0, 3).forEach(tag => {
-                const tagEl = document.createElement('span');
-                tagEl.className = 'detail-tag';
-                tagEl.textContent = tag;
-                tagContainer.appendChild(tagEl);
-            });
-            
-            window.currentDetailItem = item;
-            document.getElementById('detailModal').classList.add('show');
-        }
-
-        function closeDetail() {
-            document.getElementById('detailModal').classList.remove('show');
-        }
-
-        function handleAction(action) {
-            const item = window.currentDetailItem;
-            if (!item) return;
-            
-            const messages = {
-                'offer': `💸 Offer sent to ${item.seller}!`,
-                'save': '🔖 Saved for later',
-                'ask': `💬 Message sent to ${item.seller}`,
-                'report': '🚩 Report submitted'
-            };
-            
-            showToast(messages[action]);
-            
-            if (action === 'offer' || action === 'save') {
-                item.interest = (item.interest || 0) + 1;
-                localStorage.setItem('marketplaceItems', JSON.stringify(marketplaceItems));
-            }
-        }
-
-        // =============================================
-        // UTILITIES
-        // =============================================
-        
-        function updateRecentPreview() {
-            const scroll = document.getElementById('recentScroll');
-            const recent = marketplaceItems.slice(0, 5);
-            
-            scroll.innerHTML = recent.map(item => `
-                <div class="recent-item" onclick='showItemDetail(${JSON.stringify(item).replace(/'/g, "\\'")})'>
-                    <div class="recent-image">${item.emoji}</div>
-                    <span>${item.catLabel}</span>
-                </div>
-            `).join('');
-        }
-
-        let toastTimer;
-        function showToast(msg) {
-            const t = document.getElementById('toast');
-            t.textContent = msg;
-            t.classList.add('show');
-            clearTimeout(toastTimer);
-            toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
-        }
+        console.log('🚀 FREEPILE Ottawa ready!');
     </script>
 </body>
 </html>
